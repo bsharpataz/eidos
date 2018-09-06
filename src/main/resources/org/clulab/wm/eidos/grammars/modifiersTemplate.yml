@@ -198,3 +198,12 @@ rules:
       @theme: Entity
       [lemma=have]
       (?<trigger> [word=/(?i)^(${ trigger })/ & tag=/VBN/ & !outgoing=/dobj|${complements}/])
+
+  - name: ${ label }_dontfeellikeworking
+    priority: ${ rulepriority }
+    example: "technological progress"
+    label: ${ label }
+    action: ${ action }
+    pattern: |
+      trigger = [word=/(?i)^(${ trigger })/ & tag=/^N/]
+      theme: Entity = /${ noun_modifiers }/{1,2}

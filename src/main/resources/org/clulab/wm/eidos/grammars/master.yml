@@ -37,6 +37,12 @@ rules:
       action: applyAttachment #Should add quantifier to state of entity
       label: Quantification
 
+  - import: org/clulab/wm/eidos/grammars/interventions.yml
+    vars:
+      rulepriority: "4"
+      action: pass #Should add quantifier to state of entity
+
+
   #Step 2: Find other entity-modifying events (e.g. "Increase in rainfall")
   - import: org/clulab/wm/eidos/grammars/modifiersTemplate.yml
     vars:
@@ -44,6 +50,15 @@ rules:
       action: applyAttachment #Should add Increase/Decrease to state of entity
       label: Increase
       trigger: ${ increase_triggers }|${ noncausal_increase_triggers }
+
+  #Step 2: Find other entity-modifying events (e.g. "Increase in rainfall")
+  - import: org/clulab/wm/eidos/grammars/modifiersTemplate.yml
+    vars:
+      rulepriority: "3"
+      action: pass #Should add Increase/Decrease to state of entity
+      label: Provision
+      trigger: ${ provision_triggers }
+
 
   - import: org/clulab/wm/eidos/grammars/modifiersTemplate.yml
     vars:

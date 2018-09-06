@@ -1,7 +1,14 @@
 - Entity:
   - Param
   - Agrovoc
-  - Concept
+  - Concept:
+    # Interventions, categories from Ben's slides
+    - Intervention:
+      - Provision
+      - Infrastructure
+      - CapacitySupport
+      - Security-Force
+    - Access
 - Transparent
 - Quantifier
 - Event:
@@ -15,6 +22,9 @@
       - IsA
       - Origin
       - TransparentLink
+      # Intervention specific Relations
+      - Cost
+      - Risk # I don't know at the moment how we will differentiate this from impact
     - UndirectedRelation:
       - Correlation
       - SameAs

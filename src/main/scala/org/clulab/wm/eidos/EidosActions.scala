@@ -565,9 +565,12 @@ class EidosActions(val taxonomy: Taxonomy) extends Actions with LazyLogging {
 
   //-- Entity expansion methods (brought in from EntityFinder)
   def expand(entity: Mention, maxHops: Int, stateFromAvoid: State): Mention = {
-    val interval = traverseOutgoingLocal(entity, maxHops, stateFromAvoid, entity.sentenceObj)
-    val res = entity.asInstanceOf[TextBoundMention].copy(tokenInterval = interval)
-    res
+    entity match {
+      case tb: TextBoundMention =>
+        val interval = traverseOutgoingLocal(entity, maxHops, stateFromAvoid, entity.sentenceObj)
+        tb.copy(tokenInterval = interval)
+      case _ => entity
+    }
   }
 
 

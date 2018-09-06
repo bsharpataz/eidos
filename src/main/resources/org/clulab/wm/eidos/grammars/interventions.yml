@@ -1,0 +1,26 @@
+vars: org/clulab/wm/eidos/grammars/vars.yml
+
+
+rules:
+
+  - name: intervention-1
+    priority: ${ rulepriority }
+    example: ""
+    label: Infrastructure
+    action: ${ action }
+    pattern: |
+      trigger = [lemma=/improve/]
+      theme: Entity = >dobj >/${noun_modifiers}/{,1} [lemma = /road|bridge|highway|port/]
+      context: Entity? = >/${preps}/{,2}
+
+
+  - name: intervention-2
+    priority: ${ rulepriority }
+    example: "heavier than usual rainfall"
+    label: Risk
+    priority: 5
+    action: ${ action }
+    pattern: |
+      trigger = [word=/(un)?likely/] []{,2} [word=/^feasible|possible|succe/]
+      theme: Intervention = >dep >/${objects}/?
+      context: Entity? = >/${preps}/{,2}

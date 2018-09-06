@@ -49,7 +49,19 @@ rules:
     pattern: |
       trigger = [lemma="due" & tag=/JJ/]
       cause: Entity = <case /${preps}/{,2}
-      effect: Entity = <case <nmod_due_to? /${objects}/
+      effect: Entity = <case </nmod_due_to|nmod_to/? /${objects}/
+
+  # Used when the effect text has an object which is the true effect (i.e., in example this is "livestock assets")
+  - name: dueTo-caseSyntax-dobj_effect-${addlabel}_b
+    priority: ${rulepriority}
+    label: ${label}
+    action: ${ action }
+    example: "pastoralists have depleted or lost their livestock assets due to the conflict"
+    pattern: |
+      trigger = [lemma="due" & tag=/JJ/]
+      cause: Entity = <case /${preps}/{,2}
+      effect: Event = <case </nmod_due_to|nmod_to/
+
 
   - name: dueToSyntax4-${addlabel}
     priority: ${rulepriority}
