@@ -22,5 +22,5 @@ rules:
     action: ${ action }
     pattern: |
       trigger = [word=/(un)?likely/] []{,2} [word=/^feasible|possible|succe/]
-      theme: Intervention = >dep >/${objects}/?
+      theme: Entity = >dep >/${objects}/?
       context: Entity? = >/${preps}/{,2}
