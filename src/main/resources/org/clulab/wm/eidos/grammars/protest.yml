@@ -13,8 +13,8 @@ rules:
     action: ${ action }
     pattern: |
       trigger = [word=/(?i)^(${ trigger })/ & tag=/^V/] # original rule had RB as possible tag
-      cause: Entity = </${adverbial_clause}/? (${ agents }) /nmod_than|${ objects }|${ conjunctions }|${ noun_modifiers}/{,2} ([word=/(?i)^(${ trigger })/] /${ preps }/{,2})?
-      effect: Entity = prepc_by? (xcomp|${objects} | ${complements}) ccomp /${ noun_modifiers }|${ preps }/{,2} ([word=/(?i)^(${ trigger })/] /${ preps }/{,2})?
+      actor: Entity = </${adverbial_clause}/? (${ agents }) /nmod_than|${ objects }|${ conjunctions }|${ noun_modifiers}/{,2} ([word=/(?i)^(${ trigger })/] /${ preps }/{,2})?
+      theme: Entity = prepc_by? (xcomp|${objects} | ${complements}) ccomp /${ noun_modifiers }|${ preps }/{,2} ([word=/(?i)^(${ trigger })/] /${ preps }/{,2})?
 
       # old previous ones -- removed the preps because they were waaaay over-matching:
       #cause: Entity = </${adverbial_clause}/? (${ agents }) /${ conjunctions }|${ noun_modifiers}|${ preps }/{,2}
@@ -28,3 +28,13 @@ rules:
     pattern: |
       trigger = [word=/(?i)^(${ trigger })/ & tag=/^N/]
       theme: Entity = </${agents}/ >advcl_so_that /${objects}/{,2}
+
+  - name: ${ label }_against
+    priority: ${ rulepriority }
+    example: "exhaustion of coping capacities"
+    label: ${ label }
+    action: ${ action }
+    pattern: |
+      trigger = [word=/(?i)^(${ trigger })/ & tag=/^N/]
+      actor: Entity = </${adverbial_clause}/? (${ agents }) /nmod_than|${ objects }|${ conjunctions }|${ noun_modifiers}/{,2} ([word=/(?i)^(${ trigger })/] /${ preps }/{,2})?
+      theme: Entity = >nmod_against

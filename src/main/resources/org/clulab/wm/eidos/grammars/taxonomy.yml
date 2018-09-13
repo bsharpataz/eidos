@@ -9,7 +9,16 @@
     - Quantification
     - Increase
     - Decrease
-  - DirectedRelation:
-    - Causal
+    - Time
+  - EntityLinker:
+    - DirectedRelation:
+      - Causal
+      - IsA
+      - Origin
+      - TransparentLink
+      - Coreference
+    - UndirectedRelation:
+      - Correlation
+      - SameAs
 - Avoid:
   - Avoid-Strict
