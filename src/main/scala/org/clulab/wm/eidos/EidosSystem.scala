@@ -332,5 +332,5 @@ object EidosSystem {
   val SAME_AS_METHOD = "simple-w2v"
 
   // CAG filtering
-  val CAG_EDGES = Set("Causal", "Correlation")
+  val CAG_EDGES = Set("Causal", "Correlation", "ProtestAgainst", "Demand")
 }

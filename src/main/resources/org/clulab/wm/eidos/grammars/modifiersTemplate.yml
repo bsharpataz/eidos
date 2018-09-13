@@ -164,7 +164,7 @@ rules:
     action: ${ action }
     pattern: |
       trigger = [word=/(?i)^(${ trigger })/ & tag=/^N/]
-      theme: Entity = /${ preps }/{1,2} /${ noun_modifiers }|${ conjunctions }/{,2}
+      theme: Entity = /${ protest_preps }/{1,2} /${ noun_modifiers }|${ conjunctions }/{,2}
       quantifier:Quantifier? = ${ quant_modifiers }
 
   - name: ${ label }_ported_syntax_2_noun
@@ -198,3 +198,4 @@ rules:
       @theme: Entity
       [lemma=have]
       (?<trigger> [word=/(?i)^(${ trigger })/ & tag=/VBN/ & !outgoing=/dobj|${complements}/])
+

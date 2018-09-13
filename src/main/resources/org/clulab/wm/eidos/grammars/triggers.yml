@@ -14,3 +14,7 @@ affect_triggers: "affect|alter|(displaces?$)|chang|influenc|modifi|modify"
 nonavoid_affect_triggers: "impact"
 
 correlation_triggers: "coincid|link"
+
+protest_triggers: "condemn|congregat|demonstrat|march|picket|protest|rally|ralli|stand|support"
+demand_triggers: "demand"
+#call for

@@ -1,0 +1,30 @@
+vars: org/clulab/wm/eidos/grammars/vars.yml
+  
+rules:
+
+
+# ------------------- Explicitly Protest New --------------------------
+
+  - name: ported_syntax_1_verb-protest
+    priority: ${ rulepriority }
+    #example: "The water quality caused an increase in poverty and a decrease in poverty."
+    example: "improved economic performance expected to cause a shift from agriculture to service industry."
+    label: ProtestAgainst
+    action: ${ action }
+    pattern: |
+      trigger = [word=/(?i)^(${ trigger })/ & tag=/^V/] # original rule had RB as possible tag
+      cause: Entity = </${adverbial_clause}/? (${ agents }) /nmod_than|${ objects }|${ conjunctions }|${ noun_modifiers}/{,2} ([word=/(?i)^(${ trigger })/] /${ preps }/{,2})?
+      effect: Entity = prepc_by? (xcomp|${objects} | ${complements}) ccomp /${ noun_modifiers }|${ preps }/{,2} ([word=/(?i)^(${ trigger })/] /${ preps }/{,2})?
+
+      # old previous ones -- removed the preps because they were waaaay over-matching:
+      #cause: Entity = </${adverbial_clause}/? (${ agents }) /${ conjunctions }|${ noun_modifiers}|${ preps }/{,2}
+      #effect: Entity = prepc_by? (${objects} | ${complements}) /${ conjunctions }|${ objects }|${ noun_modifiers }|${ preps }/{,2}
+
+  - name: ${ label }_so_that
+    priority: ${ rulepriority }
+    example: "exhaustion of coping capacities"
+    label: ${ label }
+    action: ${ action }
+    pattern: |
+      trigger = [word=/(?i)^(${ trigger })/ & tag=/^N/]
+      theme: Entity = </${agents}/ >advcl_so_that /${objects}/{,2}

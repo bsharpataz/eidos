@@ -38,7 +38,7 @@ class EidosActions(val taxonomy: Taxonomy) extends Actions with LazyLogging {
     val merged = mergeAttachments(result, state.updated(result))
 
     // Keep most complete
-    val mostComplete = merged //keepMostCompleteEvents(merged, state.updated(merged))
+    val mostComplete = keepMostCompleteEvents(merged, state.updated(merged))
 
     // If the cause of an event is itself another event, replace it with the nested event's effect
     // collect all effects from causal events
@@ -58,28 +58,35 @@ class EidosActions(val taxonomy: Taxonomy) extends Actions with LazyLogging {
     modifiedMentions
   }
 
-  def createEventChain(causal: Seq[Mention], arg1: String, arg2: String): Seq[Mention] = {
-    val arg1Mentions = State(causal.flatMap(_.arguments.getOrElse(arg1, Nil)))
-    // replace event causes with captured effects if possible
-    // to stitch together sequences of causal events
-    val assembled = for {
-      m <- causal
-      _ = require(m.arguments(arg2).length == 1, "we only support a single cause and effect per event")
-      arg2Mention <- m.arguments.getOrElse(arg2, Nil)
-    } yield {
-      if (m.paths.isEmpty) {
-        // if the mention was captured by a surface rule then there is no syntactic path to retrieve
-        // return mention as-is
-        Seq(m)
-      } else {
-        // odin mentions keep track of the path between the trigger and the argument
-        // below we assume there is only one cause arg, so beware (see require statement abov)
-        val landed = m.paths(arg2).values.head.last._2 // when the rule matched, it landed on this
-        assembleEventChain(m.asInstanceOf[EventMention], arg2Mention, landed, arg1Mentions)
-      }
-    }
 
-    assembled.flatten
+    def createEventChain(causal: Seq[Mention], arg1: String, arg2: String): Seq[Mention] = {
+      val arg1Mentions = State(causal.flatMap(_.arguments.getOrElse(arg1, Nil)))
+      // replace event causes with captured effects if possible
+      // to stitch together sequences of causal events
+      val assembled = for {
+        m <- causal
+        _ = require(m.arguments(arg2).length == 1, "we only support a single cause and effect per event")
+        arg2Mention <- m.arguments.getOrElse(arg2, Nil)
+      } yield {
+        if (m.paths.isEmpty) {
+          // if the mention was captured by a surface rule then there is no syntactic path to retrieve
+          // return mention as-is
+          Seq(m)
+        } else {
+          // odin mentions keep track of the path between the trigger and the argument
+          // below we assume there is only one cause arg, so beware (see require statement abov)
+          val landed = m.paths(arg2)(m.arguments(arg2).head).last._2 // when the rule matched, it landed on this
+          // when the rule matched, it landed on this
+          // println("---------")
+          // println(s"rule: ${m.foundBy}")
+          // println(s"cause: ${m.arguments(arg2).head.text}")
+          // m.paths(arg2).keys.foreach(x => println(s"${x.text} - ${x.foundBy} - ${x.start} ${x.end}"))
+          // println("---------")
+          assembleEventChain(m.asInstanceOf[EventMention], arg2Mention, landed, arg1Mentions)
+        }
+      }
+
+      assembled.flatten
   }
 
 
@@ -241,20 +248,13 @@ class EidosActions(val taxonomy: Taxonomy) extends Actions with LazyLogging {
 
   // Remove incomplete Mentions
   def keepMostCompleteEvents(ms: Seq[Mention], state: State): Seq[Mention] = {
-//<<<<<<< HEAD
 
     val (baseEvents, nonEvents) = ms.partition(_.isInstanceOf[EventMention])
     // Filter out duplicate (or subsumed) events.  Strict containment used -- i.e. simply overlapping args is not
     // enough to be filtered out here.
     val events = filterSubstringArgumentEvents(baseEvents.map(_.asInstanceOf[EventMention]))
 
-//=======
-//    val (events, nonEvents) = ms.partition(_.isInstanceOf[EventMention])
-//    val (textBounds, relationMentions) = nonEvents.partition(_.isInstanceOf[TextBoundMention])
-//    // remove incomplete entities (i.e. under specified when more fully specified exists)
-//>>>>>>> master
-
-    // Entities
+   // Entities
     val (baseTextBounds, relationMentions) = nonEvents.partition(_.isInstanceOf[TextBoundMention])
     val textBounds = filterSubstringEntities(baseTextBounds.map(_.asInstanceOf[TextBoundMention]))
 
