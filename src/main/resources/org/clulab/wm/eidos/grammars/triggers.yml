@@ -15,6 +15,7 @@ nonavoid_affect_triggers: "impact"
 
 correlation_triggers: "coincid|link"
 
-protest_triggers: "condemn|congregat|demonstrat|march|picket|protest|rally|ralli|stand|support"
-demand_triggers: "demand"
+protest_triggers: "chant|condemn|congregat|demonstrat(e|ion)|manifestation|march|picket|protest|rally|ralli|resent|sit-in|slogan|stand"
+demand_triggers: "appeal|assert|believe|congregat|demand|demonstrat(e|ion)|insist|manifestation|march|picket|protest|rally|ralli|request|requir|shout|stand|think"
 #call for
+#demand_triggers_strict: ""

@@ -1,33 +1,57 @@
 vars: org/clulab/wm/eidos/grammars/vars.yml
+
   
 rules:
 
 
 # ------------------- Explicitly Protest New --------------------------
 
-  - name: ported_syntax_1_verb-protest
+#  - name: ported_syntax_1_verb-protest
+#    priority: ${ rulepriority }
+#    #example: "The water quality caused an increase in poverty and a decrease in poverty."
+#    example: "improved economic performance expected to cause a shift from agriculture to service industry."
+#    label: ProtestAgainst
+#    action: ${ action }
+#    pattern: |
+#      trigger = [word=/(?i)^(${ trigger })/ & tag=/^V/] # original rule had RB as possible tag
+#      actor: Entity = </${adverbial_clause}/? (${ agents }) /nmod_than|${ objects }|${ conjunctions }|${ noun_modifiers}/{,2} ([word=/(?i)^(${ trigger })/] /${ preps }/{,2})?
+#      theme: Entity = prepc_by? (xcomp|${objects} | ${complements}) ccomp /${ noun_modifiers }|${ preps }/{,2} ([word=/(?i)^(${ trigger })/] /${ preps }/{,2})?
+#
+#      # old previous ones -- removed the preps because they were waaaay over-matching:
+#      #cause: Entity = </${adverbial_clause}/? (${ agents }) /${ conjunctions }|${ noun_modifiers}|${ preps }/{,2}
+#      #effect: Entity = prepc_by? (${objects} | ${complements}) /${ conjunctions }|${ objects }|${ noun_modifiers }|${ preps }/{,2}
+
+  - name: actor-protest
     priority: ${ rulepriority }
     #example: "The water quality caused an increase in poverty and a decrease in poverty."
     example: "improved economic performance expected to cause a shift from agriculture to service industry."
-    label: ProtestAgainst
+    label: ${ label }
     action: ${ action }
     pattern: |
       trigger = [word=/(?i)^(${ trigger })/ & tag=/^V/] # original rule had RB as possible tag
       actor: Entity = </${adverbial_clause}/? (${ agents }) /nmod_than|${ objects }|${ conjunctions }|${ noun_modifiers}/{,2} ([word=/(?i)^(${ trigger })/] /${ preps }/{,2})?
-      theme: Entity = prepc_by? (xcomp|${objects} | ${complements}) ccomp /${ noun_modifiers }|${ preps }/{,2} ([word=/(?i)^(${ trigger })/] /${ preps }/{,2})?
+      theme: Entity? = >/(${objects})/
 
-      # old previous ones -- removed the preps because they were waaaay over-matching:
-      #cause: Entity = </${adverbial_clause}/? (${ agents }) /${ conjunctions }|${ noun_modifiers}|${ preps }/{,2}
-      #effect: Entity = prepc_by? (${objects} | ${complements}) /${ conjunctions }|${ objects }|${ noun_modifiers }|${ preps }/{,2}
-
-  - name: ${ label }_so_that
+  - name: theme-protest
     priority: ${ rulepriority }
-    example: "exhaustion of coping capacities"
+    #example: "The water quality caused an increase in poverty and a decrease in poverty."
+    example: "improved economic performance expected to cause a shift from agriculture to service industry."
     label: ${ label }
     action: ${ action }
     pattern: |
-      trigger = [word=/(?i)^(${ trigger })/ & tag=/^N/]
-      theme: Entity = </${agents}/ >advcl_so_that /${objects}/{,2}
+      trigger = [word=/(?i)^(${ trigger })/ & tag=/^V/] # original rule had RB as possible tag
+      actor: Entity? = </${adverbial_clause}/? (${ agents }) /nmod_than|${ objects }|${ conjunctions }|${ noun_modifiers}/{,2} ([word=/(?i)^(${ trigger })/] /${ preps }/{,2})?
+      theme: Entity = >/(${objects})/ >/${noun_modifiers}/{,2}
+
+
+#  - name: ${ label }_so_that
+#    priority: ${ rulepriority }
+#    example: "exhaustion of coping capacities"
+#    label: ${ label }
+#    action: ${ action }
+#    pattern: |
+#      trigger = [word=/(?i)^(${ trigger })/ & tag=/^N/]
+#      theme: Entity = </${agents}/ >advcl_so_that /${objects}/{,2}
 
   - name: ${ label }_against
     priority: ${ rulepriority }
@@ -35,6 +59,60 @@ rules:
     label: ${ label }
     action: ${ action }
     pattern: |
+      trigger = [word=/(?i)^(${ trigger })/]
+      actor: Entity? = </${adverbial_clause}/? (${ agents }) /nmod_than|${ objects }|${ conjunctions }|${ noun_modifiers}/{,2} ([word=/(?i)^(${ trigger })/] /${ preps }/{,2})?
+      theme: Entity =
+        ( # protest against X
+          >/${against_mods}/ /${ conjunctions }|${ noun_modifiers}/{,2}
+            |
+          # protest in opposition to X
+          >nmod_in [word=/(?i)^opposition/] >nmod_to
+        )
+
+  - name: protest-at_explicit
+    priority: ${ rulepriority }
+    example: "exhaustion of coping capacities"
+    label: ${ label }
+    action: ${ action }
+    pattern: |
+      trigger = [word=/(?i)^protest/]
+      actor: Entity? = </${adverbial_clause}/? (${ agents }) /nmod_than|${ objects }|${ conjunctions }|${ noun_modifiers}/{,2} ([word=/(?i)^(${ trigger })/] /${ preps }/{,2})?
+      theme: Entity = >nmod_at /${ conjunctions }|${ noun_modifiers}/{,2}
+
+
+
+  - name: ${ label }_noun
+    priority: ${ rulepriority }
+    example: "exhaustion of coping capacities"
+    label: ${ label }
+    action: ${ action }
+    pattern: |
       trigger = [word=/(?i)^(${ trigger })/ & tag=/^N/]
-      actor: Entity = </${adverbial_clause}/? (${ agents }) /nmod_than|${ objects }|${ conjunctions }|${ noun_modifiers}/{,2} ([word=/(?i)^(${ trigger })/] /${ preps }/{,2})?
-      theme: Entity = >nmod_against
+      actor: Entity = </(${objects})/ (${ agents }) /nmod_than|${ objects }|${ conjunctions }|${ noun_modifiers}/{,2} ([word=/(?i)^(${ trigger })/] /${ preps }/{,2})?
+      theme: Entity? =
+        </(${objects})/?
+        ( # protest against X...
+          >/${against_mods}/
+            |
+          # as a response to
+          >nmod_as
+          >/^nmod_/{,2}
+          [word=/(?i)^${response_terms}/]
+            |
+          # in opposition to
+          >nmod_in
+          [word=/(?i)^(opposition|${response_terms})/]
+          >nmod_to
+        )
+
+  - name: ${label}_noun_surface
+    priority: ${ rulepriority }
+    example: "goal of protest was/is to ..."
+    label: ${ label }
+    action: ${ action }
+    type: token
+    pattern: |
+      (?<trigger> [lemma=/(?i)^${trigger}/]) # trigger comes from provided variable
+      []{,2} # intervening text?
+      [lemma=be] to
+      @theme: Entity

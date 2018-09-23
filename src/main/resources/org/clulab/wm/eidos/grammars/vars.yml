@@ -26,4 +26,8 @@ transparent_nouns: "level|amount|quantit" # do we need these in general?
 
 protest_preps: "nmod_against"
 
+against_mods: "advcl_because|advcl_for|advcl_in_order|advcl_in_order_to|nmod_against|nmod_because|nmod_over"
+
 # Todo: nmod_from "X will follow from Y"
+
+response_terms: "answer|backlash|compensation|counter|reaction|reciprocation|reply|response|return"

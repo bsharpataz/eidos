@@ -357,6 +357,8 @@ object EidosSystem {
   val CAUSAL_LABEL: String = "Causal"
   val CORR_LABEL: String = "Correlation"
   val COREF_LABEL: String = "Coreference"
+  val PROTEST_LABEL: String = "Protest"
+  val DEMAND_LABEL: String = "Demand"
 
   // Stateful Labels used by webapp
   val INC_LABEL_AFFIX = "-Inc"
@@ -367,5 +369,5 @@ object EidosSystem {
   val SAME_AS_METHOD = "simple-w2v"
 
   // CAG filtering
-  val CAG_EDGES = Set(CAUSAL_LABEL, CORR_LABEL, COREF_LABEL)
+  val CAG_EDGES = Set(CAUSAL_LABEL, CORR_LABEL, COREF_LABEL, DEMAND_LABEL, PROTEST_LABEL)
 }

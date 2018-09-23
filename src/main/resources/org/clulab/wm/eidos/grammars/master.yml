@@ -85,15 +85,17 @@ rules:
   #Step 3: Find entity-linking events (e.g. "rainfall causes flooding")
   #Acts upon entities
 
-  # ------------ Causal ------------
+  # ------------ PROTEST ------------
   - import: org/clulab/wm/eidos/grammars/protest.yml
     vars:
       rulepriority: "6"
       addlabel: "Protest"
-      label: ProtestAgainst
+      label: Protest
       action: pass
       trigger: ${protest_triggers}
 
+
+  # ------------ PROTEST ------------
   - import: org/clulab/wm/eidos/grammars/demand.yml
     vars:
       rulepriority: "6"
@@ -102,22 +104,22 @@ rules:
       action: pass
       trigger: ${demand_triggers}
 
-
-  - import: org/clulab/wm/eidos/grammars/linkersTemplate.yml
-    vars:
-      rulepriority: "6"
-      addlabel: "Causal"
-      label: Causal
-      action: pass
-      trigger: ${cause_triggers}|${increase_triggers}|${decrease_triggers} #|${affect_triggers}|${nonavoid_affect_triggers}
-
-  - import: org/clulab/wm/eidos/grammars/reverse_direction_causal.yml
-    vars:
-      rulepriority: "6"
-      addlabel: "Causal"
-      label: Causal
-      action: pass
-      trigger: ${reverse_direction_cause_triggers}
+  # ------------ Causal ------------
+#  - import: org/clulab/wm/eidos/grammars/linkersTemplate.yml
+#    vars:
+#      rulepriority: "6"
+#      addlabel: "Causal"
+#      label: Causal
+#      action: pass
+#      trigger: ${cause_triggers}|${increase_triggers}|${decrease_triggers} #|${affect_triggers}|${nonavoid_affect_triggers}
+#
+#  - import: org/clulab/wm/eidos/grammars/reverse_direction_causal.yml
+#    vars:
+#      rulepriority: "6"
+#      addlabel: "Causal"
+#      label: Causal
+#      action: pass
+#      trigger: ${reverse_direction_cause_triggers}
 
 
 

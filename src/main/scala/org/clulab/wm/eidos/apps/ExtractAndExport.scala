@@ -3,6 +3,7 @@ package org.clulab.wm.eidos.apps
 import java.io.PrintWriter
 
 import com.typesafe.config.{Config, ConfigFactory}
+import ai.lum.common.StringUtils._
 import org.clulab.utils.Serializer
 import org.clulab.odin.{EventMention, Mention, State}
 import org.clulab.serialization.json.stringify
@@ -88,12 +89,7 @@ case class MitreExporter (pw: PrintWriter, reader: EidosSystem, filename: String
   }
 
   def header(): String = {
-    "Source\tSystem\tSentence ID\tFactor A Text\tFactor A Normalization\t" +
-      "Factor A Modifiers\tFactor A Polarity\tRelation Text\tRelation Normalization\t" +
-      "Relation Modifiers\tFactor B Text\tFactor B Normalization\tFactor B Modifiers\t" +
-      "Factor B Polarity\tLocation\tTime\tEvidence\t" +
-      s"Factor A top${topN}_UNOntology\tFactor A top${topN}_FAOOntology\tFactor A top${topN}_WDIOntology" +
-        s"Factor B top${topN}_UNOntology\tFactor B top${topN}_FAOOntology\tFactor B top${topN}_WDIOntology"
+    "file\tsentence_id\taid\teid\tnews_id\ttitle\tdate\tevent_type\tactor\ttheme\tsentence_text"
   }
 
 
@@ -102,39 +98,46 @@ case class MitreExporter (pw: PrintWriter, reader: EidosSystem, filename: String
     val allOdinMentions = annotatedDocument.eidosMentions.map(_.odinMention)
     val mentionsToPrint = annotatedDocument.eidosMentions.filter(m => reader.releventEdge(m.odinMention, State(allOdinMentions)))
 
-    for {
-      mention <- mentionsToPrint
+    for (mention <- mentionsToPrint) {
 
-      source = filename
-      system = "Eidos"
-      sentence_id = mention.odinMention.sentence
+      val odinMention = mention.odinMention
 
-      cause <- mention.asInstanceOf[EidosEventMention].eidosArguments("cause")
-      factor_a_info = EntityInfo(cause)
+      val sentence_id = mention.odinMention.sentence
+      val aid = ""
+      val eid = ""
+      val newsid = ""
+      val title = ""
+      val date = ""
 
-      trigger = mention.odinMention.asInstanceOf[EventMention].trigger
-      relation_txt = ExporterUtils.removeTabAndNewline(trigger.text)
-      relation_norm = mention.label // i.e., "Causal" or "Correlation"
-      relation_modifier = ExporterUtils.getModifier(mention) // prob none
+      val actor = headTextOrElse(odinMention.arguments.get("actor"), "")
+      val theme = headTextOrElse(odinMention.arguments.get("theme"), "")
 
-      effect <- mention.asInstanceOf[EidosEventMention].eidosArguments("effect")
-      factor_b_info = EntityInfo(effect)
+      val trigger_txt = triggerTextOrElse(odinMention, "")
+      val relation_norm = mention.label // i.e., "Protest" or "Demand"
 
-      location = "" // I could try here..?
-      time = ""
-      evidence = ExporterUtils.removeTabAndNewline(mention.odinMention.sentenceObj.getSentenceText.trim)
+      val evidence = mention.odinMention.sentenceObj.getSentenceText.normalizeSpace
 
-      row = source + "\t" + system + "\t" + sentence_id + "\t" +
-        factor_a_info.toTSV() + "\t" +
-        relation_txt + "\t" + relation_norm + "\t" + relation_modifier + "\t" +
-        factor_b_info.toTSV() + "\t" +
-        location + "\t" + time + "\t" + evidence + "\t" + factor_a_info.groundingToTSV + "\t" +
-        factor_b_info.groundingToTSV + "\n"
+      val info = Seq(filename, sentence_id, aid, eid, newsid, title, date, relation_norm, actor, theme, evidence)
 
+      val row = info.mkString("\t") + "\n"
+      pw.print(row)
 
-    } pw.print(row)
+    }
   }
 
+
+  def headTextOrElse(seq: Option[Seq[Mention]], default: String) = {
+    if (seq.isEmpty) default
+    else if (seq.get.isEmpty) default
+    else seq.get.head.text.normalizeSpace
+  }
+
+  def triggerTextOrElse(m: Mention, default: String): String = {
+    m match {
+      case em: EventMention => em.trigger.text.normalizeSpace
+      case _ => default
+    }
+  }
 
 
 }
@@ -153,6 +156,11 @@ object SerializedMentions {
   def load(filename: String): Seq[Mention] = Serializer.load[SerializedMentions](filename).mentions
 }
 
+
+
+
+
+
 case class EntityInfo(m: EidosMention, topN: Int = 5) {
   val text = ExporterUtils.removeTabAndNewline(m.odinMention.text)
   val norm = getBaseGrounding(m)
@@ -170,6 +178,9 @@ case class EntityInfo(m: EidosMention, topN: Int = 5) {
 }
 
 object ExporterUtils {
+
+
+
   def getModifier(mention: EidosMention): String = {
     val attachments = mention.odinMention.attachments
     val quantTriggers = attachments

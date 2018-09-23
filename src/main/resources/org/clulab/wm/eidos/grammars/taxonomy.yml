@@ -3,7 +3,7 @@
 - Quantifier
 - Event:
   - SimpleEvents:
-    - ProtestAgainst
+    - Protest
     - Demand
   - EntityModifier:
     - Quantification

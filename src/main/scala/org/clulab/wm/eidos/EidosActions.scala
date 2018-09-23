@@ -50,7 +50,7 @@ class EidosActions(val taxonomy: Taxonomy) extends Actions with LazyLogging {
 
     // If the cause of an event is itself another event, replace it with the nested event's effect
     // collect all effects from causal events
-    val (causal, nonCausal) = mostComplete.partition(m => EidosSystem.CAG_EDGES.contains(m.label))
+    val (causal, nonCausal) = mostComplete.partition(m => m matches EidosSystem.CAUSAL_LABEL)
 
     val assemble1 = createEventChain(causal, "effect", "cause")
     // FIXME please
@@ -832,7 +832,7 @@ object EidosActions extends Actions {
     "^nmod_due_to".r,
 //    "^nmod_among".r
     "^conj".r,
-    "^cc".r,
+    "^cc$".r,
     "^punct".r
 
   )
@@ -876,7 +876,12 @@ object EidosActions extends Actions {
   }
 
   def existsDeterminerCause(mention: Mention): Boolean = {
-    startsWithCorefDeterminer(mention.arguments("cause").head)
+    val causeOption =  mention.arguments.get(EidosSystem.CAUSAL_LABEL)
+    if (causeOption.nonEmpty) {
+      startsWithCorefDeterminer(causeOption.get.head)
+    } else {
+      false
+    }
   }
 
   def startsWithCorefDeterminer(m: Mention): Boolean = {
