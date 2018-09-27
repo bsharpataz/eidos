@@ -58,6 +58,10 @@ object FileUtils {
     try {
       source.mkString
     }
+     catch {
+       case malformed: java.nio.charset.MalformedInputException => ""
+       case _: Throwable => throw new RuntimeException("Some other kind of exception!")
+      }
     finally {
       source.close()
     }
