@@ -50,17 +50,23 @@ def mk_file_lexicon(filename):
                 title = line.split("	•	 ")[1].strip()
                 title = title.replace("<U+2028>", "")
                 # print(title)
+                if title == "":
+                    print(f"TITLE is empty: fn-{filename}, line: {line}")
                 file_lexicon[title] = len(file_lexicon)
             elif len(pattern.findall(line)) > 0:
                 title = pattern.findall(line)[0]
                 title = title.replace("<U+2028>", "")
                 # print("!!!" + title)
+                if title == "":
+                    print(f"TITLE is empty: fn-{filename}, line: {line}")
                 file_lexicon[title] = len(file_lexicon)
             elif line.startswith("ABSTRACT"):
                 line_idx_title = i - 7
                 title = lines[line_idx_title].strip()
                 title = title.replace("<U+2028>", "")
                 # print("ABSTRACT TITLE: " + title)
+                if title == "":
+                    print(f"TITLE is empty: fn-{filename}, line: {line}")
                 file_lexicon[title] = len(file_lexicon)
 
 
@@ -168,7 +174,7 @@ def mk_file_lexicon(filename):
 
 def main():
     directory = "3"
-    wdir = f"/Users/bsharp/data/protests/0-BBC-News-Articles_Rebecca/{directory}-BBC"
+    wdir = f"/Users/bsharp/data/protests/0-BBC-News-Articles_Rebecca/{directory}-BBC/orig/"
 
     os.chdir(wdir)
     for file in glob.glob("*.txt"):
@@ -178,6 +184,8 @@ def main():
         for i, article in enumerate(articles):
             # Retrieve the article info
             article_title = article["title"]
+            if article_title == "":
+                print(f"TITLE is empty: fn-{file}, i: {i}")
             article_body = article["body"]
             article_date = article["date"]
             # Write the index info

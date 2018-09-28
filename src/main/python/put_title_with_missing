@@ -1,0 +1,82 @@
+from collections import defaultdict
+from aggregateInfo import read_master_csv, get_files, sanitize
+import sys
+
+def convert_master_to_dict(master_info):
+    # Master = namedtuple("Master", 'RA news_id published_date title aid eid countryname')
+    # MiniMaster = namedtuple("MiniMaster", 'news_id aid eid')
+    out = defaultdict(list)
+    for master in master_info:
+        #print(master)
+        if master.title.startswith("(CORR)RUSSIA:"):
+            print(master)
+
+        out[sanitize(master.title.strip())].append(master)
+    # sys.exit()
+    return out
+
+def lookup_aid_eid(fn, master_dict):
+    aid, eid = None, None
+    woulda_worked = 0
+    f = open(fn)
+    lines = f.readlines()
+    invalid = ['', 'News']
+    kept = []
+    for l in lines:
+        if l.strip() not in invalid:
+            if not l.strip().startswith("Sources:"):
+                if not l.strip().startswith("Timeline:"):
+                    kept.append(l)
+    cand_title = kept[0].strip()
+
+    if sanitize(cand_title) in master_dict:
+        # success!
+        worked = 1
+        entries_for_title = master_dict[sanitize(cand_title)]
+        if len(entries_for_title) == 1:
+            aid = entries_for_title[0].aid
+            eid = entries_for_title[0].eid
+
+        else:
+            woulda_worked = 1
+            worked = 0
+
+        # print(f"  worked: {worked}")
+    else:
+        print(f"  didn't work: {fn}, t:{cand_title}, st:{sanitize(cand_title)}")
+        worked = 0
+
+    f.close()
+    return worked, woulda_worked, aid, eid
+
+def main():
+    master_file = "/Users/bsharp/data/protests/0-BBC-News-Articles_Rebecca/0_NEW_ArticleLIST_Master_1-10679.csv"
+    master_list = read_master_csv(master_file)
+    master_dict = convert_master_to_dict(master_list)
+    worked = 0
+    woulda = 0
+    files_seen = 0
+    aid_dict = dict()
+    for dirnumber in ['1', '2', '3']:
+        article_files = get_files(f"/Users/bsharp/data/protests/tmp{dirnumber}", ".txt")
+
+
+        for af in article_files:
+            files_seen += 1
+            num_worked, woulda_worked, aid, eid = lookup_aid_eid(af, master_dict)
+            worked += num_worked
+            woulda += woulda_worked
+            if aid:
+                aid_dict[af] = [aid, eid]
+
+    print(f"From {files_seen} files, lookup worked for {worked}")
+    print(f"From {files_seen} files, lookup woulda worked for {woulda}")
+    print(len(aid_dict))
+
+    aid_out = open("/Users/bsharp/data/protests/aids.tsv", 'w')
+    for k,v in aid_dict.items():
+        aid_out.write(f"{k}\t{v[0]}\t{v[1]}\n")
+    aid_out.close()
+
+
+main()

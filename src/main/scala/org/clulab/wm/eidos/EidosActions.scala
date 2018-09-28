@@ -17,8 +17,9 @@ import org.clulab.wm.eidos.document.EidosDocument
 import org.clulab.wm.eidos.entities.{EntityConstraints, EntityHelper}
 
 import scala.collection.mutable.{ArrayBuffer, Set => MutableSet}
-
 import org.clulab.wm.eidos.document.TimeInterval
+
+import scala.util.matching.Regex
 
 // 1) the signature for an action `(mentions: Seq[Mention], state: State): Seq[Mention]`
 // 2) the methods available on the `State`
@@ -26,6 +27,7 @@ import org.clulab.wm.eidos.document.TimeInterval
 //TODO: need to add polarity flipping
 
 class EidosActions(val taxonomy: Taxonomy) extends Actions with LazyLogging {
+
 
 
   /*
@@ -460,10 +462,20 @@ class EidosActions(val taxonomy: Taxonomy) extends Actions with LazyLogging {
 //    overlapping.foreach(ov => println("  " + ov.text + ", " + ov.foundBy))
     val completeFoundBy = compositionalFoundBy(overlapping)
 
-    val allAttachments = overlapping.flatMap(m => m.attachments).distinct
+    val allAttachments = overlapping.flatMap(m => m.attachments).distinct ++ addAnyOverlappingQuantifiers(expanded, state)
 //    println(s"allAttachments: ${allAttachments.mkString(", ")}")
     // Add on all attachments
     addAttachments(expanded, allAttachments, completeFoundBy)
+  }
+
+  def addAnyOverlappingQuantifiers(m: Mention, state: State): Seq[Attachment] = {
+    val overlapping = state.mentionsFor(m.sentence, m.tokenInterval)
+    overlapping.foreach(m => shortDisplay(m))
+    val quants = overlapping.filter(_ matches "Quantifier")
+    val quantAttachments = quants.map(quant => Quantification(quant.text, None))
+
+    println(s"Found ${quantAttachments.length} quant attachments for mention: [${m.text}]")
+    quantAttachments
   }
 
   // Add the temporal attachments for any temporal expression

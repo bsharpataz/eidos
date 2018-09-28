@@ -31,3 +31,5 @@ against_mods: "advcl_because|advcl_for|advcl_in_order|advcl_in_order_to|nmod_aga
 # Todo: nmod_from "X will follow from Y"
 
 response_terms: "answer|backlash|compensation|counter|reaction|reciprocation|reply|response|return"
+demonstration_terms: "congregat|demonstrat(e|ion)|manifestation|march|picket|protest|rally|ralli"
+think_terms: "believ|feel|think"

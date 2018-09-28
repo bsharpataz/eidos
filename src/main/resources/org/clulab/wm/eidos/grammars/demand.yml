@@ -19,7 +19,7 @@ rules:
     label: ${ label }
     action: ${ action }
     pattern: |
-      trigger = [word=/(?i)^(${ trigger })/ & tag=/^N/]
+      trigger = [word=/(?i)^(${trigger}|${demonstration_terms})/ & tag=/^N/]
       theme: Entity = </${agents}/ >advcl_so_that /${objects}/{,2}
 
   - name: ${ label }_call_for
@@ -28,9 +28,19 @@ rules:
     label: ${ label }
     action: ${ action }
     pattern: |
-      trigger = [word=/(?i)^(call)/] for
+      trigger = [word=/(?i)^(call|${trigger}|${demonstration_terms})/] for
       actor: Entity? = </${agents}/
       theme: Entity = >/(nmod_for|advcl_for)/
+
+  - name: ${ label }_nmod_on
+    priority: ${ rulepriority }
+    example: ""
+    label: ${ label }
+    action: ${ action }
+    pattern: |
+      trigger = [word=/(?i)^(${trigger}|${demonstration_terms})/]
+      actor: Entity? = </${agents}/
+      theme: Entity = >/(nmod_on)/
 
   - name: demand-ccomp
     priority: ${ rulepriority }
@@ -41,6 +51,17 @@ rules:
       trigger = [word=/(?i)^(${ trigger })/ & tag=/^V/] # original rule had RB as possible tag
       actor: Entity? = </${adverbial_clause}/? (${ agents }) /nmod_than|${ objects }|${ conjunctions }|${ noun_modifiers}/{,2} ([word=/(?i)^(${ trigger })/] /${ preps }/{,2})?
       theme: Entity = ccomp /${ noun_modifiers }|${ preps }/{,2} ([word=/(?i)^(${ trigger })/] /${ preps }/{,2})?
+
+  - name: ${ label }_think_that
+    priority: ${ rulepriority }
+    example: ""
+    label: ${ label }
+    action: ${ action }
+    pattern: |
+      trigger = [word=/(?i)^(${think_terms})/]
+      actor: Entity? = </${agents}/
+      theme: Entity = >ccomp [lemma=/(?i)^need/]
+
 
 
 #  - name: ${ label }_simple_obj
