@@ -18,6 +18,30 @@ rules:
     vars:
       rulepriority: "1"
 
+  #Step 1: find the direct attachments of entities (e.g. "small puppies")
+  - import: org/clulab/wm/eidos/grammars/violence.yml
+    vars:
+      rulepriority: "1"
+      action: pass
+      label: Violence1
+      trigger: ${ violence_1_triggers }
+
+  - import: org/clulab/wm/eidos/grammars/violence.yml
+    vars:
+      rulepriority: "1"
+      action: pass
+      label: Violence2
+      trigger: ${ violence_2_triggers }
+
+  - import: org/clulab/wm/eidos/grammars/violence.yml
+    vars:
+      rulepriority: "1"
+      action: pass
+      label: Violence3
+      trigger: ${ violence_3_triggers }
+
+
+
 
   #Events
   # TODO: 'with X, Y...' sentences:
