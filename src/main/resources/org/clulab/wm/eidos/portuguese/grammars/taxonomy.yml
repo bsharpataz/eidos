@@ -1,0 +1,26 @@
+- Entity:
+  - Concept
+- Quantifier
+- Event:
+  - SimpleEvents:
+    - Protest
+    - Demand
+    - Violence:
+      - Violence1
+      - Violence2
+      - Violence3
+  - EntityModifier:
+    - Quantification
+    - Increase
+    - Decrease
+  - EntityLinker:
+    - DirectedRelation:
+      - Causal
+      - IsA
+      - Origin
+      - TransparentLink
+    - UndirectedRelation:
+      - Correlation
+      - SameAs
+- Avoid:
+  - Avoid-Strict

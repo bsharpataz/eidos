@@ -3,7 +3,7 @@ package org.clulab.wm.eidos.apps
 import org.clulab.serialization.json.stringify
 import org.clulab.wm.eidos.EidosSystem
 import org.clulab.wm.eidos.serialization.json.JLDCorpus
-import org.clulab.wm.eidos.utils.FileUtils
+import org.clulab.wm.eidos.utils.{FileUtils, Timer}
 
 object ExtractJsonLDFromFile extends App {
   val inputFile = args(0)
