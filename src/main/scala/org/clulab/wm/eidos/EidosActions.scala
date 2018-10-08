@@ -468,7 +468,7 @@ class EidosActions(val taxonomy: Taxonomy) extends Actions with LazyLogging {
 
   def addAnyOverlappingQuantifiers(m: Mention, state: State): Seq[Attachment] = {
     val overlapping = state.mentionsFor(m.sentence, m.tokenInterval)
-    overlapping.foreach(m => shortDisplay(m))
+//    overlapping.foreach(m => shortDisplay(m))
     val quants = overlapping.filter(_ matches "Quantifier")
     val quantAttachments = quants.map(quant => Quantification(quant.text, None))
 
