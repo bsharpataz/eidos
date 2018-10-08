@@ -2,9 +2,17 @@
   - Param
   - Agrovoc
   - Concept
-- Transparent
+  - Organization
 - Quantifier
+- Location
 - Event:
+  - SimpleEvent:
+    - Protest
+    - Demand
+    - Violence:
+      - Violence1
+      - Violence2
+      - Violence3
   - EntityModifier:
     - Quantification
     - Increase

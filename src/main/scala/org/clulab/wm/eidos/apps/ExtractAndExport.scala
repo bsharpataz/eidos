@@ -88,9 +88,8 @@ case class MitreExporter (pw: PrintWriter, reader: EidosSystem, filename: String
   }
 
   def header(): String = {
-    "file\tsentence_id\taid\teid\tnews_id\ttitle\tdate\tevent_type\tactor\ttheme\tsentence_text"
+    "file\tsentence_id\taid\teid\tnews_id\ttitle\tdate\tevent_type\tactor\tactor_number\ttheme\tlocations\tsentence_text\trule_name"
   }
-
 
 
   def printTableRows(annotatedDocument: AnnotatedDocument, pw: PrintWriter, filename: String, reader: EidosSystem): Unit = {
@@ -110,13 +109,18 @@ case class MitreExporter (pw: PrintWriter, reader: EidosSystem, filename: String
 
       val actor = headTextOrElse(odinMention.arguments.get("actor"), "")
       val theme = headTextOrElse(odinMention.arguments.get("theme"), "")
+      val actorNumber = actorNumberOrElse(odinMention.arguments.get("actor"), "")
 
       val trigger_txt = triggerTextOrElse(odinMention, "")
       val relation_norm = mention.label // i.e., "Protest" or "Demand"
 
+      val locations = locationOrElse(odinMention, "")
+
+      val foundBy = odinMention.foundBy
+
       val evidence = mention.odinMention.sentenceObj.getSentenceText.normalizeSpace
 
-      val info = Seq(filename, sentence_id, aid, eid, newsid, title, date, relation_norm, actor, theme, evidence)
+      val info = Seq(filename, sentence_id, aid, eid, newsid, title, date, relation_norm, actor, actorNumber, theme, locations, evidence, foundBy)
 
       val row = info.mkString("\t") + "\n"
       pw.print(row)
@@ -131,6 +135,14 @@ case class MitreExporter (pw: PrintWriter, reader: EidosSystem, filename: String
     else seq.get.head.text.normalizeSpace
   }
 
+  def actorNumberOrElse(seq: Option[Seq[Mention]], default: String) = {
+    if (seq.isEmpty) default
+    else if (seq.get.isEmpty) default
+    else {
+      seq.get.head.attachments.filter(_.isInstanceOf[Quantification]).map(_.asInstanceOf[TriggeredAttachment].trigger).mkString(", ")
+    }
+  }
+
   def triggerTextOrElse(m: Mention, default: String): String = {
     m match {
       case em: EventMention => em.trigger.text.normalizeSpace
@@ -138,7 +150,11 @@ case class MitreExporter (pw: PrintWriter, reader: EidosSystem, filename: String
     }
   }
 
-
+  def locationOrElse(m: Mention, default: String): String = {
+    val ms = m +: m.arguments.values.flatten.toSeq.distinct
+    val locations = ms.flatMap(m => m.attachments.filter(_.isInstanceOf[Location]))
+    locations.mkString(", ")
+  }
 }
 
 

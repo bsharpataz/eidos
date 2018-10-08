@@ -44,20 +44,20 @@ class EidosActions(val taxonomy: Taxonomy) extends Actions with LazyLogging {
 
     // If the cause of an event is itself another event, replace it with the nested event's effect
     // collect all effects from causal events
-    val (causal, nonCausal) = merged.partition(m => EidosSystem.CAG_EDGES.contains(m.label))
+//    val (causal, nonCausal) = merged.partition(m => EidosSystem.CAG_EDGES.contains(m.label))
 
-    val assemble1 = createEventChain(causal, "effect", "cause")
-    // FIXME please
-    //val assemble2 = createEventChain(assemble1, "cause", "effect")
-    val assemble2 = assemble1
-    // FIXME
+//    val assemble1 = createEventChain(causal, "effect", "cause")
+//    // FIXME please
+//    //val assemble2 = createEventChain(assemble1, "cause", "effect")
+//    val assemble2 = assemble1
+//    // FIXME
     // in the sentence below we stitch together the sequence of cause->effect events
     // but some expanded nounphrase remains, which shouldn't be displayed in the webapp
     // In Kenya , the shortened length of the main growing season , due in part to a delayed onset of seasonal rainfall , coupled with long dry spells and below-average rainfall is resulting in below-average production prospects in large parts of the eastern , central , and southern Rift Valley .
-    val modifiedMentions = assemble2 ++ nonCausal
+//    val modifiedMentions = assemble2 ++ nonCausal
 
     // Basic coreference, hedging, and negation
-    val afterResolving = basicDeterminerCoref(modifiedMentions, state)
+    val afterResolving = basicDeterminerCoref(merged, state)
     val afterHedging = HypothesisHandler.detectHypotheses(afterResolving, state)
     val afterNegation = NegationHandler.detectNegations(afterHedging)
 
@@ -671,9 +671,15 @@ class EidosActions(val taxonomy: Taxonomy) extends Actions with LazyLogging {
 
     def getOverlappingAttachments(m: Mention, state: State): Set[Attachment] = {
       val interval = m.tokenInterval
-      // TODO: Currently this is only Property attachments, but we can do more too
+      // Properties
       val overlappingProps = state.mentionsFor(m.sentence, interval, label = "Property")
-      overlappingProps.map(pm => Property(pm.text, None)).toSet
+      val propAttachments = overlappingProps.map(pm => Property(pm.text, None)).toSet
+      // Locations
+      val overlappingLocs = state.mentionsFor(m.sentence, interval, label = "Location")
+      val locAttachments = overlappingLocs.map(lm => Location(lm.text, None)).toSet
+      // todo? Violence?
+
+      propAttachments ++ locAttachments
     }
 
 

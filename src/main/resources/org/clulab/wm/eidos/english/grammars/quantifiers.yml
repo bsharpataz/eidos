@@ -11,4 +11,17 @@ rules:
       type: token
       pattern: |
         [word=/(?i)^(dozen|hundred|thousand)/]
-        #[entity="B-Quantifier"] [entity="I-Quantifier"]* (to [entity="B-Quantifier"] [entity="I-Quantifier"]*)?
+
+    - name: location-stanfordner
+      label: Location
+      priority: ${rulepriority}
+      type: token
+      pattern: |
+        [entity="LOCATION"]+
+
+    - name: organization-stanfordner
+      label: Organization
+      priority: ${rulepriority}
+      type: token
+      pattern: |
+        [entity="ORGANIZATION"]+
