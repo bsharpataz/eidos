@@ -121,12 +121,17 @@ rules:
 
   - name: ${ label }_noun
     priority: ${ rulepriority }
-    example: "exhaustion of coping capacities"
+    example: "More than one hundred women staged demonstration on Monday."
     label: ${ label }
     action: ${ action }
     pattern: |
       trigger = [word=/(?i)^(${ trigger }|demonstrat)/ & tag=/^N/ & !word=/ers$/]
-      actor: Entity = </(${objects})/ (${ agents }) /nmod_than|${ objects }|${ conjunctions }|${ noun_modifiers}/{,2} ([word=/(?i)^(${ trigger })/] /${ preps }/{,2})?
+      actor: Entity =
+        # the negative look ahead is to prevent things like "X provoked a protest"
+        </(${objects})/ (?! [word=/(?i)^(allow|cause|contain|disrupt|incit|instigat|observ|prevent|provok|stop|supervis|watch)/])
+        (${ agents })
+        /nmod_than|${ objects }|${ conjunctions }|${ noun_modifiers}/{,2}
+        ([word=/(?i)^(${ trigger })/] /${ preps }/{,2})?
       theme: Entity? =
         </(${objects})/?
         ( # protest against X...
@@ -142,6 +147,20 @@ rules:
           [word=/(?i)^(opposition|${response_terms})/]
           >nmod_to
         )
+
+  - name: ${ label }_provoked_noun
+    priority: ${ rulepriority }
+    example: "Regional reorganization provokes protests from Ouidah residents ."
+    label: ${ label }
+    action: ${ action }
+    pattern: |
+      trigger = [word=/(?i)^(${ trigger }|demonstrat)/ & tag=/^N/ & !word=/ers$/]
+      theme: Entity =
+        # the negative look ahead is to prevent things like "X provoked a protest"
+        </(${objects})/ [word=/(?i)^(cause|incit|instigat|provok)/]
+        (${ agents })
+      actor: Entity? = >/(nmod_from|nmod_by)/
+
 
   - name: ${label}_noun_surface
     priority: ${ rulepriority }

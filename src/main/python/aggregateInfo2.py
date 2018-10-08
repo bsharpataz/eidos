@@ -60,8 +60,8 @@ def read_extraction_file(fn, master_aid_dict, aid_index):
 
         with open(fn) as f:
             for line in f:
-                line = line.rstrip()
-                if line != "file	sentence_id	aid	eid	news_id	title	date	event_type  hedge_neg	actor	actor_number	theme	locations	sentence_text	rule_name":
+                line = line.strip()
+                if not line.startswith("file"):
                     _, sentence_id, _, _, _, _, _, event_type, hedge_neg, actor, actor_number, theme, locations, sentence_text, rule_name = line.split("\t")
 
                     extracted_info = Extraction(file_prefix, file_index, sentence_id, m.aid, m.eid, m.news_id, m.title, m.published_date, event_type, hedge_neg, actor, actor_number, theme, locations, sentence_text, rule_name)
@@ -83,6 +83,8 @@ def export_extractions(extractions, fn):
         csv_writer = csv.writer(csv_file, delimiter='\t')
         csv_writer.writerow(header)
         for e in extractions:
+            if e.sentence_id == "sentence_id":
+                print("YIKES!")
             csv_writer.writerow(list(e))
 
 
@@ -129,7 +131,8 @@ def main():
     num_files = 0
 
     # get the list of extraction files
-    extraction_dir = f"/Users/bsharp/data/protests/all_files/extractions"
+    # extraction_dir = f"/Users/bsharp/data/protests/all_files/extractions"
+    extraction_dir = f"/Users/bsharp/data/protests/with_per/extractions"
     filelist = get_files(extraction_dir, "tsv")
     for f in filelist:
         num_files += 1
@@ -144,7 +147,7 @@ def main():
     # print(f"There were a total of {backoff_ctr} files that were found with the backoff.")
     print(f"There were a total of {backoff_ctr} files that were unused bc of empty titles.")
     print(f"There were a total of {num_files} files.")
-    outputfile = "/Users/bsharp/data/protests/extractions_all_coverage.tsv"
+    outputfile = "/Users/bsharp/data/protests/extractions_all_with_per.tsv"
     export_extractions(extractions, outputfile)
     #
 
