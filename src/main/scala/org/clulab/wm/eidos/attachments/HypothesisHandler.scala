@@ -58,7 +58,8 @@ object HypothesisHandler {
     "theorize",
     "theory",
     "think",
-    "whether")
+    "whether",
+    "would")
 
   def detectHypotheses(mentions: Seq[Mention], state: State): Seq[Mention] = mentions.map(addAnyHedging)
 

@@ -6,19 +6,19 @@
 - Quantifier
 - Location
 - Event:
-  - SimpleEvent:
-    - Protest
-    - Demand
-    - Violence:
-      - Violence1
-      - Violence2
-      - Violence3
+  - Violence:
+    - Violence1
+    - Violence2
+    - Violence3
   - EntityModifier:
     - Quantification
     - Increase
     - Decrease
     - Time
   - EntityLinker:
+    - SimpleEvent:
+      - Protest
+      - Demand
     - DirectedRelation:
       - Causal
       - IsA

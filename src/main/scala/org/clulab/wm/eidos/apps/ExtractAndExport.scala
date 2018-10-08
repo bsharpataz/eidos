@@ -88,7 +88,7 @@ case class MitreExporter (pw: PrintWriter, reader: EidosSystem, filename: String
   }
 
   def header(): String = {
-    "file\tsentence_id\taid\teid\tnews_id\ttitle\tdate\tevent_type\tactor\tactor_number\ttheme\tlocations\tsentence_text\trule_name"
+    "file\tsentence_id\taid\teid\tnews_id\ttitle\tdate\tevent_type\thedge_neg\tactor\tactor_number\ttheme\tlocations\tsentence_text\trule_name"
   }
 
 
@@ -114,13 +114,15 @@ case class MitreExporter (pw: PrintWriter, reader: EidosSystem, filename: String
       val trigger_txt = triggerTextOrElse(odinMention, "")
       val relation_norm = mention.label // i.e., "Protest" or "Demand"
 
+      val hedgedNegatedStatus = hedgedOrNegated(odinMention)
+
       val locations = locationOrElse(odinMention, "")
 
       val foundBy = odinMention.foundBy
 
       val evidence = mention.odinMention.sentenceObj.getSentenceText.normalizeSpace
 
-      val info = Seq(filename, sentence_id, aid, eid, newsid, title, date, relation_norm, actor, actorNumber, theme, locations, evidence, foundBy)
+      val info = Seq(filename, sentence_id, aid, eid, newsid, title, date, relation_norm, hedgedNegatedStatus, actor, actorNumber, theme, locations, evidence, foundBy)
 
       val row = info.mkString("\t") + "\n"
       pw.print(row)
@@ -154,6 +156,15 @@ case class MitreExporter (pw: PrintWriter, reader: EidosSystem, filename: String
     val ms = m +: m.arguments.values.flatten.toSeq.distinct
     val locations = ms.flatMap(m => m.attachments.filter(_.isInstanceOf[Location]))
     locations.mkString(", ")
+  }
+
+  def hedgedOrNegated(m: Mention): String = {
+    val h = m.attachments.filter(_.isInstanceOf[Hedging]).map(_.asInstanceOf[TriggeredAttachment].trigger)
+    val hedge = if (h.nonEmpty) s"Hedged(${h.mkString(", ")})" else ""
+    val n = m.attachments.filter(_.isInstanceOf[Negation]).map(_.asInstanceOf[TriggeredAttachment].trigger)
+    val neg = if (n.nonEmpty) s"Negated(${n.mkString(", ")})" else ""
+
+    hedge + neg
   }
 }
 
