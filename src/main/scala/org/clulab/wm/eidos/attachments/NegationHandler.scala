@@ -88,7 +88,7 @@ object NegationHandler {
     val negations = new ArrayBuffer[Mention]
 
     for {
-      tok <- event.tokenInterval
+      tok <- event.trigger.tokenInterval
       out <- outgoing.lift(tok)
       (ix, label) <- out
       if label == "neg"
