@@ -147,7 +147,7 @@ case class MitreExporter (pw: PrintWriter, reader: EidosSystem, filename: String
     if (seq.isEmpty) default
     else if (seq.get.isEmpty) default
     else {
-      seq.get.head.attachments.filter(_.isInstanceOf[Quantification]).map(_.asInstanceOf[TriggeredAttachment].trigger).mkString(", ")
+      seq.get.head.attachments.filter(_.isInstanceOf[Quantification]).map(_.asInstanceOf[TriggeredAttachment].trigger).mkString(", ").normalizeSpace
     }
   }
 
@@ -162,7 +162,7 @@ case class MitreExporter (pw: PrintWriter, reader: EidosSystem, filename: String
   // Locations in the Actor
   def locationOrElse(ms: Option[Seq[Mention]], default: String): String = {
     if (ms.isDefined) {
-      ms.get.map(m => locationOrElse(m, default)).mkString(", ")
+      ms.get.map(m => locationOrElse(m, default)).mkString(", ").normalizeSpace
     } else default
   }
   def locationOrElse(m: Mention, default: String): String = {
@@ -174,7 +174,7 @@ case class MitreExporter (pw: PrintWriter, reader: EidosSystem, filename: String
   // Locations and ORGS in the theme
   def themeActorOrElse(themes: Option[Seq[Mention]], default: String): String = {
     if (themes.isDefined) {
-      themes.get.map(theme => themeActorOrElse(theme, default)).mkString(", ")
+      themes.get.map(theme => themeActorOrElse(theme, default)).mkString(", ").normalizeSpace
     } else default
   }
   def themeActorOrElse(theme: Mention, default: String): String = {
@@ -191,7 +191,7 @@ case class MitreExporter (pw: PrintWriter, reader: EidosSystem, filename: String
     val n = m.attachments.filter(_.isInstanceOf[Negation]).map(_.asInstanceOf[TriggeredAttachment].trigger)
     val neg = if (n.nonEmpty) s"Negated(${n.mkString(", ")})" else ""
 
-    hedge + neg
+    (hedge + neg).normalizeSpace
   }
 }
 

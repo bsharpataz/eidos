@@ -62,6 +62,7 @@ def read_extraction_file(fn, master_aid_dict, aid_index):
             for line in f:
                 line = line.strip()
                 if not line.startswith("file"):
+                    print(line)
                     _, sentence_id, _, _, _, _, _, event_type, hedge_neg, actor, actor_number, actor_location, theme, theme_actor, sentence_text, rule_name = line.split("\t")
 
                     extracted_info = Extraction(file_prefix, file_index, sentence_id, m.aid, m.eid, m.news_id, m.title, m.published_date, event_type, hedge_neg, actor, actor_number, actor_location, theme, theme_actor, sentence_text, rule_name)
@@ -132,7 +133,8 @@ def main():
 
     # get the list of extraction files
     # extraction_dir = f"/Users/bsharp/data/protests/all_files/extractions"
-    extraction_dir = f"/Users/bsharp/data/protests/with_per/extractions"
+    # extraction_dir = f"/Users/bsharp/data/protests/with_per/extractions"
+    extraction_dir = f"/Users/bsharp/data/protests/oct13/extractions"
     filelist = get_files(extraction_dir, "tsv")
     for f in filelist:
         num_files += 1
@@ -147,7 +149,7 @@ def main():
     # print(f"There were a total of {backoff_ctr} files that were found with the backoff.")
     print(f"There were a total of {backoff_ctr} files that were unused bc of empty titles.")
     print(f"There were a total of {num_files} files.")
-    outputfile = "/Users/bsharp/data/protests/extractions_all_with_per.tsv"
+    outputfile = "/Users/bsharp/data/protests/extractions_all_oct13.tsv"
     export_extractions(extractions, outputfile)
     #
 
