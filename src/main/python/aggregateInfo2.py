@@ -5,7 +5,7 @@ import glob
 import re
 import string
 
-Extraction = namedtuple('Extraction', 'file_prefix article_index sentence_id aid eid news_id title date event_type hedge_neg actor actor_number theme locations sentence_text rule')
+Extraction = namedtuple('Extraction', 'file_prefix article_index sentence_id aid eid news_id title date event_type hedge_neg actor actor_number actor_location theme them_actor sentence_text rule')
 Master = namedtuple("Master", 'RA news_id published_date title aid eid countryname')
 
 
@@ -62,9 +62,9 @@ def read_extraction_file(fn, master_aid_dict, aid_index):
             for line in f:
                 line = line.strip()
                 if not line.startswith("file"):
-                    _, sentence_id, _, _, _, _, _, event_type, hedge_neg, actor, actor_number, theme, locations, sentence_text, rule_name = line.split("\t")
+                    _, sentence_id, _, _, _, _, _, event_type, hedge_neg, actor, actor_number, actor_location, theme, theme_actor, sentence_text, rule_name = line.split("\t")
 
-                    extracted_info = Extraction(file_prefix, file_index, sentence_id, m.aid, m.eid, m.news_id, m.title, m.published_date, event_type, hedge_neg, actor, actor_number, theme, locations, sentence_text, rule_name)
+                    extracted_info = Extraction(file_prefix, file_index, sentence_id, m.aid, m.eid, m.news_id, m.title, m.published_date, event_type, hedge_neg, actor, actor_number, actor_location, theme, theme_actor, sentence_text, rule_name)
                     # extracted_info.title = title
                     # extracted_info.date = date
                     #print(extracted_info)
@@ -79,7 +79,7 @@ def read_extraction_file(fn, master_aid_dict, aid_index):
 
 def export_extractions(extractions, fn):
     with open(fn, 'w') as csv_file:
-        header = 'file_prefix article_index sentence_id aid eid news_id title date event_type hedge_neg actor actor_number theme locations sentence_text rule_name'.split(" ")
+        header = 'file_prefix article_index sentence_id aid eid news_id title date event_type hedge_neg actor actor_number actor_location theme theme_actor sentence_text rule_name'.split(" ")
         csv_writer = csv.writer(csv_file, delimiter='\t')
         csv_writer.writerow(header)
         for e in extractions:

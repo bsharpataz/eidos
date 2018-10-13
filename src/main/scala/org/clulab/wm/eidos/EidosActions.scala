@@ -677,9 +677,12 @@ class EidosActions(val taxonomy: Taxonomy) extends Actions with LazyLogging {
       // Locations
       val overlappingLocs = state.mentionsFor(m.sentence, interval, label = "Location")
       val locAttachments = overlappingLocs.map(lm => Location(lm.text, None)).toSet
+      // Organizations
+      val overlappingOrgs = state.mentionsFor(m.sentence, interval, label = "Organization")
+      val orgAttachments = overlappingOrgs.map(om => Organization(om.text, None)).toSet
       // todo? Violence?
 
-      propAttachments ++ locAttachments
+      propAttachments ++ locAttachments ++ orgAttachments
     }
 
 

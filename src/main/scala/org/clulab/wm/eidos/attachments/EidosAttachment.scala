@@ -65,6 +65,7 @@ object EidosAttachment {
       case Hedging.label => new Hedging(trigger, someQuantifications)
       case Negation.label => new Negation(trigger, someQuantifications)
       case Location.label => new Location(trigger, someQuantifications)
+      case Organization.label => new Organization(trigger, someQuantifications)
     }
   }
 
@@ -329,6 +330,31 @@ object Location {
     val attachmentInfo = TriggeredAttachment.getAttachmentInfo(mention, argument)
 
     new Location(attachmentInfo.triggerText, attachmentInfo.quantifierTexts, attachmentInfo.triggerMention, attachmentInfo.quantifierMentions)
+  }
+}
+
+class Organization(trigger: String, quantifiers: Option[Seq[String]], triggerMention: Option[TextBoundMention] = None,
+               quantifierMentions: Option[Seq[Mention]] = None) extends TriggeredAttachment(trigger, quantifiers, triggerMention, quantifierMentions) {
+
+  override def canEqual(other: Any): Boolean = other.isInstanceOf[Organization]
+
+  override def newJLDAttachment(serializer: JLDEidosSerializer): JLDEidosAttachment =
+    newJLDTriggeredAttachment(serializer, Organization.kind)
+
+  override def toJson(): JValue = toJson(Organization.label)
+}
+
+object Organization {
+  val label = "Organization"
+  val kind = "ORGANIZATION"
+  val argument = "quantifier"
+
+  def apply(trigger: String, quantifiers: Option[Seq[String]]) = new Organization(trigger, quantifiers)
+
+  def apply(mention: Mention): Organization = {
+    val attachmentInfo = TriggeredAttachment.getAttachmentInfo(mention, argument)
+
+    new Organization(attachmentInfo.triggerText, attachmentInfo.quantifierTexts, attachmentInfo.triggerMention, attachmentInfo.quantifierMentions)
   }
 }
 

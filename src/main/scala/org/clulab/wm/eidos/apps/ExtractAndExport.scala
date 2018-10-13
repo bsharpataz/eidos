@@ -88,7 +88,7 @@ case class MitreExporter (pw: PrintWriter, reader: EidosSystem, filename: String
   }
 
   def header(): String = {
-    "file\tsentence_id\taid\teid\tnews_id\ttitle\tdate\tevent_type\thedge_neg\tactor\tactor_number\ttheme\tlocations\tsentence_text\trule_name"
+    "file\tsentence_id\taid\teid\tnews_id\ttitle\tdate\tevent_type\thedge_neg\tactor\tactor_number\tactor_location\ttheme\ttheme_actor\tsentence_text\trule_name"
   }
 
 
@@ -107,22 +107,28 @@ case class MitreExporter (pw: PrintWriter, reader: EidosSystem, filename: String
       val title = ""
       val date = ""
 
-      val actor = headTextOrElse(odinMention.arguments.get("actor"), "")
-      val theme = headTextOrElse(odinMention.arguments.get("theme"), "")
+      val actors = odinMention.arguments.get("actor")
+      val actor = headTextOrElse(actors, "")
       val actorNumber = actorNumberOrElse(odinMention.arguments.get("actor"), "")
+      val actorLocation = locationOrElse(actors, "")
+
+      val themes = odinMention.arguments.get("theme")
+      val theme = headTextOrElse(themes, "")
+      val themeActor = themeActorOrElse(themes, "")
+
 
       val trigger_txt = triggerTextOrElse(odinMention, "")
       val relation_norm = mention.label // i.e., "Protest" or "Demand"
 
       val hedgedNegatedStatus = hedgedOrNegated(odinMention)
 
-      val locations = locationOrElse(odinMention, "")
+//      val locations = locationOrElse(odinMention, "")
 
       val foundBy = odinMention.foundBy
 
       val evidence = mention.odinMention.sentenceObj.getSentenceText.normalizeSpace
 
-      val info = Seq(filename, sentence_id, aid, eid, newsid, title, date, relation_norm, hedgedNegatedStatus, actor, actorNumber, theme, locations, evidence, foundBy)
+      val info = Seq(filename, sentence_id, aid, eid, newsid, title, date, relation_norm, hedgedNegatedStatus, actor, actorNumber, actorLocation, theme, themeActor, evidence, foundBy)
 
       val row = info.mkString("\t") + "\n"
       pw.print(row)
@@ -137,7 +143,7 @@ case class MitreExporter (pw: PrintWriter, reader: EidosSystem, filename: String
     else seq.get.head.text.normalizeSpace
   }
 
-  def actorNumberOrElse(seq: Option[Seq[Mention]], default: String) = {
+  def actorNumberOrElse(seq: Option[Seq[Mention]], default: String): String = {
     if (seq.isEmpty) default
     else if (seq.get.isEmpty) default
     else {
@@ -152,10 +158,31 @@ case class MitreExporter (pw: PrintWriter, reader: EidosSystem, filename: String
     }
   }
 
+
+  // Locations in the Actor
+  def locationOrElse(ms: Option[Seq[Mention]], default: String): String = {
+    if (ms.isDefined) {
+      ms.get.map(m => locationOrElse(m, default)).mkString(", ")
+    } else default
+  }
   def locationOrElse(m: Mention, default: String): String = {
     val ms = m +: m.arguments.values.flatten.toSeq.distinct
     val locations = ms.flatMap(m => m.attachments.filter(_.isInstanceOf[Location]))
-    locations.mkString(", ")
+    if (locations.nonEmpty) locations.mkString(", ") else default
+  }
+
+  // Locations and ORGS in the theme
+  def themeActorOrElse(themes: Option[Seq[Mention]], default: String): String = {
+    if (themes.isDefined) {
+      themes.get.map(theme => themeActorOrElse(theme, default)).mkString(", ")
+    } else default
+  }
+  def themeActorOrElse(theme: Mention, default: String): String = {
+    val ts = theme +: theme.arguments.values.flatten.toSeq.distinct
+    val locations = ts.flatMap(m => m.attachments.filter(_.isInstanceOf[Location]))
+    val organizations = ts.flatMap(m => m.attachments.filter(_.isInstanceOf[Organization]))
+    val actors = locations ++ organizations
+    if (actors.nonEmpty) actors.mkString(", ") else default
   }
 
   def hedgedOrNegated(m: Mention): String = {

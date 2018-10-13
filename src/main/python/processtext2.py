@@ -218,7 +218,7 @@ def mk_file_lexicon(filename):
 
 
 def main():
-    directory = "1"
+    directory = "3"
     wdir = f"/Users/bsharp/data/protests/0-BBC-News-Articles_Rebecca/{directory}-BBC/orig/"
 
     os.chdir(wdir)
@@ -228,9 +228,11 @@ def main():
 
         for i, a in enumerate(articles):
             article_file = f"/Users/bsharp/data/protests/tmp{directory}/{file[:-4]}_{i}.txt"
-            article_out = open(article_file, 'w')
-            article_out.write(a)
-            article_out.close()
+            print(article_file)
+
+            # article_out = open(article_file, 'w')
+            # article_out.write(a)
+            # article_out.close()
         #
         #
         # lexout = open(f"{file[:-4]}_index.txt", 'w')
