@@ -10,7 +10,8 @@ rules:
       priority: ${rulepriority}
       type: token
       pattern: |
-        [word=/(?i)^(dozen|hundred|thousand)/]
+        [word=/(?i)^(dozen|hundred|thousand)/ | entity=/NUMBER/]
+
 
     - name: location-stanfordner
       label: Location

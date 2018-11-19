@@ -2,13 +2,16 @@ var bratLocation = 'assets/brat';
 
 // Color names used
 var baseConceptColor = '#CCD1D1';
-var increaseConceptColor = '#BBDC90';
-var decreaseConceptColor = '#FC5C38';
+var increaseConceptColor = baseConceptColor; // '#BBDC90';
+var decreaseConceptColor = baseConceptColor; // '#FC5C38';
 var quantifierColor = '#AED6F1';
-var quantifiedConceptColor = '#85C1E9';
+var quantifiedConceptColor = baseConceptColor; // '#85C1E9';
 var causalEventColor = '#BB8FCE';
 var correlationEventColor = '#F7DC6F';
-var timeExpressionColor = '#FFA500'
+var timeExpressionColor = '#FFA500';
+var protestEventColor = '#77bfff';
+var demandEventColor = '#fc993c';
+var locColor = '#8bd884';
 
 head.js(
     // External libraries
@@ -90,6 +93,18 @@ var collData = {
             // Use a slightly darker version of the bgColor for the border
             "borderColor": "darken"
         },
+    {
+          "type": "Organization",
+          "labels":  ["Organization", "ORG"],
+          "bgColor": "yellow",
+          "borderColor": "darken"
+         },
+    {
+       "type": "Location",
+       "labels":  ["Location", "LOC"],
+       "bgColor": locColor,
+       "borderColor": "darken"
+      },
      // --------------------------- Param -------------------------------------
      {
       "type": "FarmSize",
@@ -372,7 +387,28 @@ var collData = {
           {"type": "cause", "labels": ["cause"], "borderColor": "darken", "bgColor":"pink"},
           {"type": "effect", "labels": ["effect"], "borderColor": "darken", "bgColor":"pink"}
          ]
-      }
+      },
+      {
+          "type": "Protest",
+          "labels": ["PROTEST"],
+          "bgColor": protestEventColor,
+          "borderColor": "darken",
+          "arcs": [
+            {"type": "theme", "labels": ["theme"], "borderColor": "darken", "bgColor":"pink"},
+            {"type": "actor", "labels": ["actor"], "borderColor": "darken", "bgColor":"pink"}
+           ]
+        },
+      {
+          "type": "Demand",
+          "labels": ["DEMAND"],
+          "bgColor": demandEventColor,
+          "borderColor": "darken",
+         "arcs": [
+             {"type": "theme", "labels": ["theme"], "borderColor": "darken", "bgColor":"pink"},
+             {"type": "actor", "labels": ["actor"], "borderColor": "darken", "bgColor":"pink"}
+            ]
+        },
+
     ]
 };
 

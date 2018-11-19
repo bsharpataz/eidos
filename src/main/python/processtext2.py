@@ -230,9 +230,9 @@ def main():
             article_file = f"/Users/bsharp/data/protests/tmp{directory}/{file[:-4]}_{i}.txt"
             print(article_file)
 
-            # article_out = open(article_file, 'w')
-            # article_out.write(a)
-            # article_out.close()
+            article_out = open(article_file, 'w')
+            article_out.write(a)
+            article_out.close()
         #
         #
         # lexout = open(f"{file[:-4]}_index.txt", 'w')

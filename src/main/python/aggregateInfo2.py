@@ -62,7 +62,7 @@ def read_extraction_file(fn, master_aid_dict, aid_index):
             for line in f:
                 line = line.strip()
                 if not line.startswith("file"):
-                    print(line)
+                    #print(line)
                     _, sentence_id, _, _, _, _, _, event_type, hedge_neg, actor, actor_number, actor_location, theme, theme_actor, sentence_text, rule_name = line.split("\t")
 
                     extracted_info = Extraction(file_prefix, file_index, sentence_id, m.aid, m.eid, m.news_id, m.title, m.published_date, event_type, hedge_neg, actor, actor_number, actor_location, theme, theme_actor, sentence_text, rule_name)

@@ -52,6 +52,17 @@ rules:
       actor: Entity? = </${adverbial_clause}/? (${ agents }) /nmod_than|${ objects }|${ conjunctions }|${ noun_modifiers}/{,2} ([word=/(?i)^(${ trigger })/] /${ preps }/{,2})?
       theme: Entity = ccomp /${ noun_modifiers }|${ preps }/{,2} ([word=/(?i)^(${ trigger })/] /${ preps }/{,2})?
 
+  - name: demand-warn-to
+    priority: ${ rulepriority }
+    example: "It was quiet on Sunday [the 9th] in Pljevlja, northern Montenegro, following yesterday's unrests and protests by armed civilians who demanded that the decision to transfer 20 policemen from their town be revoked."
+    label: Demand
+    action: ${ action }
+    pattern: |
+      trigger = [word=/(?i)^warn/ & tag=/^V/] # original rule had RB as possible tag
+      actor: Entity? = </${adverbial_clause}/? (${ agents }) /nmod_than|${ objects }|${ conjunctions }|${ noun_modifiers}/{,2} ([word=/(?i)^(${ trigger })/] /${ preps }/{,2})?
+      theme: Entity = dobj </${agents}/ /${ noun_modifiers }|${ preps }/{,2} ([word=/(?i)^(${ trigger })/] /${ preps }/{,2})?
+
+
 #  - name: ${ label }_think_that
 #    priority: ${ rulepriority }
 #    example: ""
