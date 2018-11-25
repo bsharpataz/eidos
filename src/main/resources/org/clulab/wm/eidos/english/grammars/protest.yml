@@ -34,7 +34,7 @@ rules:
         (${ agents })
         /nmod_than|${ objects }|${ conjunctions }|${ noun_modifiers}/{,2}
         ([word=/(?i)^(${ trigger })/] /${ preps }/{,2})?
-      theme: Entity? = >/(${objects})/
+      theme: Entity? = >/(${objects})|xcomp/
 
   - name: theme-protest
     priority: ${ rulepriority }
@@ -49,7 +49,7 @@ rules:
         (${ agents })
         /nmod_than|${ objects }|${ conjunctions }|${ noun_modifiers}/{,2}
         ([word=/(?i)^(${ trigger })/] /${ preps }/{,2})?
-      theme: Entity = >/(${objects})/ >/${noun_modifiers}/{,2}
+      theme: Entity = >/(${objects}|xcomp)/ >/${noun_modifiers}/{,2}
 
 
 #  - name: ${ label }_so_that
@@ -135,6 +135,7 @@ rules:
       theme: Entity? =
         </(${objects})/?
         ( # protest against X...
+          >nmod_in_front_of?
           >/${against_mods}/
             |
           # as a response to
