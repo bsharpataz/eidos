@@ -14,7 +14,7 @@ import org.clulab.wm.eidos.groundings.EidosOntologyGrounder
 import org.clulab.wm.eidos.mentions.{EidosEventMention, EidosMention}
 import org.clulab.wm.eidos.{AnnotatedDocument, EidosSystem}
 import org.clulab.wm.eidos.serialization.json.JLDCorpus
-import org.clulab.wm.eidos.utils.FileUtils
+import org.clulab.wm.eidos.utils.{FileUtils, GroundingUtils}
 import org.clulab.wm.eidos.utils.FileUtils.{findFiles, printWriterFromFile}
 import org.clulab.wm.eidos.utils.GroundingUtils.{getBaseGrounding, getGroundingsString}
 
@@ -88,7 +88,7 @@ case class MitreExporter (pw: PrintWriter, reader: EidosSystem, filename: String
   }
 
   def header(): String = {
-    "file\tsentence_id\taid\teid\tnews_id\ttitle\tdate\tevent_type\thedge_neg\tactor\tactor_number\tactor_location\ttheme\ttheme_actor\tsentence_text\trule_name"
+    "file\tsentence_id\taid\teid\tnews_id\ttitle\tdate\tevent_type\thedge_neg\tactor\tactor_number\tactor_location\ttheme\ttheme_actor\ttheme grounding\tsentence_text\trule_name"
   }
 
 
@@ -115,7 +115,7 @@ case class MitreExporter (pw: PrintWriter, reader: EidosSystem, filename: String
       val themes = odinMention.arguments.get("theme")
       val theme = headTextOrElse(themes, "")
       val themeActor = themeActorOrElse(themes, "")
-
+      val themeGrounded = themeGroundingOrElse(mention.eidosArguments.get("theme"), "")
 
       val trigger_txt = triggerTextOrElse(odinMention, "")
       val relation_norm = mention.label // i.e., "Protest" or "Demand"
@@ -128,7 +128,7 @@ case class MitreExporter (pw: PrintWriter, reader: EidosSystem, filename: String
 
       val evidence = mention.odinMention.sentenceObj.getSentenceText.normalizeSpace
 
-      val info = Seq(filename, sentence_id, aid, eid, newsid, title, date, relation_norm, hedgedNegatedStatus, actor, actorNumber, actorLocation, theme, themeActor, evidence, foundBy)
+      val info = Seq(filename, sentence_id, aid, eid, newsid, title, date, relation_norm, hedgedNegatedStatus, actor, actorNumber, actorLocation, theme, themeActor, themeGrounded, evidence, foundBy)
 
       val row = info.mkString("\t") + "\n"
       pw.print(row)
@@ -183,6 +183,18 @@ case class MitreExporter (pw: PrintWriter, reader: EidosSystem, filename: String
     val organizations = ts.flatMap(m => m.attachments.filter(_.isInstanceOf[Organization]))
     val actors = locations ++ organizations
     if (actors.nonEmpty) actors.mkString(", ") else default
+  }
+
+  // Locations and ORGS in the theme
+  def themeGroundingOrElse(themes: Option[Seq[EidosMention]], default: String): String = {
+    if (themes.isDefined) {
+      themes.get.map(theme => themeGroundingOrElse(theme, default)).mkString(", ").normalizeSpace
+    } else default
+  }
+  def themeGroundingOrElse(theme: EidosMention, default: String): String = {
+    val ts = theme +: theme.eidosArguments.values.flatten.toSeq.distinct
+    val groundings = ts.map(m => GroundingUtils.getBaseGrounding(m))
+    if (groundings.nonEmpty) groundings.mkString("; ") else default
   }
 
   def hedgedOrNegated(m: Mention): String = {

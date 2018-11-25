@@ -1,0 +1,30 @@
+- Entity:
+  - Param
+  - Agrovoc
+  - Concept
+  - Organization
+- Quantifier
+- Location
+- Event:
+  - Violence:
+    - Violence1
+    - Violence2
+    - Violence3
+  - EntityModifier:
+    - Quantification
+    - Increase
+    - Decrease
+    - Time
+  - EntityLinker:
+    - SimpleEvent:
+      - Protest
+      - Demand
+    - DirectedRelation:
+      - Causal
+      - IsA
+      - Coreference
+    - UndirectedRelation:
+      - Correlation
+      - SameAs
+- Avoid:
+  - Avoid-Strict

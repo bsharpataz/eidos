@@ -1,0 +1,182 @@
+- Protests:
+  - foreign policy:
+    - conflict:
+      - OntologyNode:
+        examples:
+        - plans to wage war
+        - keeping troops
+        - agression
+        - deployment
+        - cease-fire
+        - cessation of hostilities
+        name: peace (anti-war) (anti-war, disagree with involving in war including sending troops, support foreign wars)
+        polarity: 1.0
+      - OntologyNode:
+        examples:
+        - bombing of the embassy
+        - missile attack of embassy
+        - agression and interference
+        - abuction of countrymen
+        name: international crisis (nationalist)
+        polarity: 1.0
+      - OntologyNode:
+        examples:
+        - move to grab the islet island territory
+        - territorial integrity
+        - territory
+        - landing on island
+        name: territorial disputes
+        polarity: 1.0
+      - OntologyNode:
+        examples:
+        - withdrawl of foreign troops forces
+        - live-firing drills
+        - presence of air base
+        name: anti-foreign troops (anti-occupation)
+        polarity: 1.0
+    - diplomacy:
+      - OntologyNode:
+        examples:
+        - move to normalize ties with the regime 
+        - not receive the envoy
+        name: diplomatic relationship
+        polarity: 1.0
+      - OntologyNode:
+        examples:
+        - recognize
+        - recognition
+        name: recognition
+        polarity: 1.0
+    - international trade:
+      - OntologyNode:
+        examples:
+        - internal dispute
+        - government policy be more favorable to sector
+        name: internal dispute
+        polarity: 1.0
+      - OntologyNode:
+        examples:
+        - anti-international trade
+        - not sign treaty trade
+        - import imports
+        - export exports
+        - free trade talks
+        name: anti-international trade
+        polarity: 1.0
+    - international organization:
+      - OntologyNode:
+        examples:
+        - food rations
+        - emergency food support
+        - food aid
+        - food and water distribution
+        - water trucking
+        name: request aid
+        polarity: 1.0
+  - politics:
+    - OntologyNode:
+      examples:
+      - anti-government
+      - leadership change
+      - quit his post position
+      - resign
+      - overthrow of the regime
+      name: anti-government (demands a leadership change)
+      polarity: 1.0
+    - election:   
+      - OntologyNode:
+        examples:
+        - election
+        - referendum
+        - electoral commissions
+        - new elections be held
+        - vote
+        name: call for election
+        polarity: 1.0
+      - OntologyNode:
+        examples:
+        - election results
+        - results
+        - election outcome
+        name: annulment of election results
+        polarity: 1.0
+    - government repression:
+      - OntologyNode:
+        examples:
+        - media freedom
+        - free press
+        - curb on electronic media
+        - murder imprisonment of journalist
+        name: media freedom
+        polarity: 1.0
+      - OntologyNode:
+        examples:
+        - killing of colleagues
+        - repressed protesters
+        - imprisonment of opposition politicians
+        - arrested protestors
+        - bloodshed
+        - anti-war anti-warlord anti-gunlord
+        name: physical integrity right (killing, imprisonment, repression against protesters etc.)
+        polarity: 1.0
+    - OntologyNode:
+      examples:
+      - subnational conflict
+      - expel ethnic group
+      - religious fighting
+      - civil war
+      - separatist
+      - kidnapping ethnic people
+      name: subnational conflict
+      polarity: 1.0
+  - economic:
+    - OntologyNode:
+      examples:
+      - low wages
+      - poor living and working conditions
+      - low income
+      - unpaid wages
+      - long working hours
+      - bad unsafe work conditions
+      name: wage/labor conditions
+      polarity: 1.0
+    - OntologyNode:
+      examples:
+      - welfare of the poor
+      name: welfare
+      polarity: 1.0
+    - OntologyNode:
+      examples:
+      - price inflation
+      - soaring prices
+      - high inflation
+      name: price/inflation
+      polarity: 1.0
+    - OntologyNode:
+      examples:
+      - industry within national structure
+      - privatize industry
+      - privatization of industry
+      name: privatization of industry
+      polarity: 1.0
+    - OntologyNode:
+      examples:
+      - plan for bank
+      - freeze bank accounts
+      - monetary policy
+      - interest rates
+      - government guarantees for loans
+      name: monetary policy
+      polarity: 1.0
+  - social:
+    - OntologyNode:
+      examples:
+      - education
+      - elementary education rights
+      - access to school
+      - language education
+      - studies
+      - courses
+      - improvement of conditions at university and colleges
+      name: education
+      polarity: 1.0
