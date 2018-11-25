@@ -12,15 +12,67 @@ import org.clulab.struct.Interval
   *
   * Adapted for use in Eidos
   */
-object NegationHandler {
+class NegationHandler(val language: String) {
 
   def detectNegations(mentions: Seq[Mention]): Seq[Mention] = {
     // do something very smart to handle negated events
     // and then return the mentions
-    mentions.map(detectNegation(_))
+    // Note that the approach can be different for different languages!
+    language match {
+      case "english" => mentions.map(detectNegationEnglish)
+      case "portuguese" => mentions.map(detectNegationPortuguese)
+      case _ => throw new RuntimeException(s"Unsupported language: $language")
+    }
   }
 
-  def detectNegation(m: Mention): Mention = {
+  def detectNegationPortuguese(m: Mention): Mention = {
+    m match {
+      case event: EventMention =>
+        // Dependency Negations
+        val depNegations = gatherNegDepNegationsPortuguese(event)
+        handleNegations(m.asInstanceOf[EventMention], depNegations.toSet)
+      case _ => m
+    }
+  }
+
+  def gatherNegDepNegationsPortuguese(event: EventMention):Seq[Mention] = {
+    val dependencies = event.sentenceObj.dependencies
+
+    /////////////////////////////////////////////////
+    // Check the outgoing edges from the trigger looking
+    // for a advmod label that lands in words like (não e sem)
+    // ex1: chuva não provoca alagamento.
+    // ex2: O período de latência diminui os riscos da prematuridade sem aumentar a morbidade.
+    // TODO: maybe incluse 'nem'
+    val outgoing = dependencies match {
+      case Some(deps) => deps.outgoingEdges
+      case None => Array.empty
+    }
+
+    val negations = new ArrayBuffer[Mention]
+    val words = event.sentenceObj.words
+    for {
+      tok <- event.tokenInterval
+      out <- outgoing.lift(tok)
+      (ix, label) <- out
+      if (label == "advmod" && words(ix) == "não") | (label == "mark" && words(ix) == "sem")
+    } {
+      negations.append(
+        new TextBoundMention(
+          Seq("Negation_trigger"),
+          Interval(ix),
+          sentence = event.sentence,
+          document = event.document,
+          keep = event.keep,
+          foundBy = event.foundBy
+        )
+      )
+    }
+    negations
+  }
+
+
+  def detectNegationEnglish(m: Mention): Mention = {
     m match {
       case event: EventMention =>
         // Dependency Negations
@@ -87,8 +139,11 @@ object NegationHandler {
 
     val negations = new ArrayBuffer[Mention]
 
+    // Get the token interval of the event, but exclude the intervals of the arguments
+    val argumentIntervals = event.arguments.values.flatten.map(_.tokenInterval)
     for {
-      tok <- event.trigger.tokenInterval
+      tok <- event.tokenInterval
+      if !argumentIntervals.exists(_.contains(tok))
       out <- outgoing.lift(tok)
       (ix, label) <- out
       if label == "neg"
@@ -113,9 +168,12 @@ object NegationHandler {
                                    previouslyFound: Set[Int]
                                  ): Seq[Mention] = {
 
+    // Get the token interval of the event, but exclude the intervals of the arguments
+    val argumentIntervals = event.arguments.values.flatten.map(_.tokenInterval)
     // Check for single-token negative verbs
     for {
-      (ix, lemma) <- (leftContext ++ rightContext)
+      (ix, lemma) <- leftContext ++ rightContext
+      if !argumentIntervals.exists(_.contains(ix))
       if (Seq("fail", "not") contains lemma) && !(previouslyFound contains ix)
     } yield new TextBoundMention(
       Seq("Negation_trigger"),
@@ -141,6 +199,9 @@ object NegationHandler {
       )
     }
 
+    // Get the token interval of the event, but exclude the intervals of the arguments
+    val argumentIntervals = event.arguments.values.flatten.map(_.tokenInterval)
+
     val verbs = Seq(("play", "no"), ("play", "little"), ("is", "not"), ("be", "insufficient"))
     // Introduce bigrams for two-token verbs in both sides of the trigger
     for {
@@ -149,6 +210,8 @@ object NegationHandler {
       bigrams = (side zip side.slice(1, side.length)) map (x => flattenTuples(x._1, x._2))
 
       (interval, bigram) <- bigrams
+
+      if !argumentIntervals.exists(_.contains(interval._1)) && !argumentIntervals.exists(_.contains(interval._2))
 
       if (verbs contains bigram) && (previouslyFound intersect (interval._1 to interval._2 + 1).toSet).isEmpty
 
@@ -161,4 +224,10 @@ object NegationHandler {
       foundBy = event.foundBy
     )
   }
+}
+
+object NegationHandler{
+
+  def apply(language: String): NegationHandler = new NegationHandler(language)
+
 }

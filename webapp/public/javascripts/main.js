@@ -8,10 +8,12 @@ var quantifierColor = '#AED6F1';
 var quantifiedConceptColor = baseConceptColor; // '#85C1E9';
 var causalEventColor = '#BB8FCE';
 var correlationEventColor = '#F7DC6F';
-var timeExpressionColor = '#FFA500';
 var protestEventColor = '#77bfff';
 var demandEventColor = '#fc993c';
 var locColor = '#8bd884';
+var timeExpressionColor = '#FFA500'
+var geoLocationColor = '#FFA500'
+
 
 head.js(
     // External libraries
@@ -105,243 +107,15 @@ var collData = {
        "bgColor": locColor,
        "borderColor": "darken"
       },
-     // --------------------------- Param -------------------------------------
-     {
-      "type": "FarmSize",
-      "labels":  ["FarmSize_PARAM"],
-      "bgColor": "yellow",
-      "borderColor": "darken"
-     },
-     {
-      "type": "FertilizerUse",
-      "labels":  ["FertilizerUse_PARAM"],
-      "bgColor": "yellow",
-      "borderColor": "darken"
-     },
-     {
-      "type": "FertilizerPrice",
-      "labels":  ["FertilizerPrice_PARAM"],
-      "bgColor": "yellow",
-      "borderColor": "darken"
-     },
-     {
-      "type": "HerdSize",
-      "labels":  ["HerdSize_PARAM"],
-      "bgColor": "yellow",
-      "borderColor": "darken"
-     },
-     {
-       "type": "HouseholdSize",
-       "labels":  ["HouseholdSize_PARAM"],
-       "bgColor": "yellow",
-       "borderColor": "darken"
-     },
-     {
-       "type": "Irrigation",
-       "labels":  ["Irrigation_PARAM"],
-       "bgColor": "yellow",
-       "borderColor": "darken"
-     },
-     {
-      "type": "Labor",
-      "labels":  ["Labor_PARAM"],
-      "bgColor": "yellow",
-      "borderColor": "darken"
-    },
-     {
-      "type": "PestDisease",
-      "labels":  ["PestDisease_PARAM"],
-      "bgColor": "yellow",
-      "borderColor": "darken"
-     },
-     {
-       "type": "Productivity",
-       "labels":  ["Productivity_PARAM"],
-       "bgColor": "yellow",
-       "borderColor": "darken"
-     },
-     {
-       "type": "Soil",
-       "labels":  ["Soil_PARAM"],
-       "bgColor": "yellow",
-       "borderColor": "darken"
-     },
-     {
-      "type": "Subsidy",
-      "labels":  ["Subsidy_PARAM"],
-      "bgColor": "yellow",
-      "borderColor": "darken"
-      },
-      {
-        "type": "Water",
-        "labels":  ["Water_PARAM"],
-        "bgColor": "yellow",
-        "borderColor": "darken"
-      },
-      {
-       "type": "Government",
-       "labels":  ["Government_PARAM"],
-       "bgColor": "yellow",
-       "borderColor": "darken"
-      },
-      {
-       "type": "Climate",
-       "labels":  ["Climate_PARAM"],
-       "bgColor": "yellow",
-       "borderColor": "darken"
-      },
-      {
-       "type": "Poverty",
-       "labels":  ["Poverty_PARAM"],
-       "bgColor": "yellow",
-       "borderColor": "darken"
-      },
-      {
-       "type": "Economy",
-       "labels":  ["Economy_PARAM"],
-       "bgColor": "yellow",
-       "borderColor": "darken"
-      },
-      {
-       "type": "Crop",
-       "labels":  ["Crop_PARAM"],
-       "bgColor": "yellow",
-       "borderColor": "darken"
-      },
-      {
-       "type": "Pollution",
-       "labels":  ["Pollution_PARAM"],
-       "bgColor": "yellow",
-       "borderColor": "darken"
-      },
-      {
-        "type": "Drought",
-        "labels":  ["Drought_PARAM"],
-        "bgColor": "yellow",
-        "borderColor": "darken"
-      },
-      // --------------------------- AGROVOC -------------------------------------
-     {
-       "type": "Animal",
-       "labels":  ["Animal_AGROVOC"],
-       "bgColor": "orange",
-       "borderColor": "darken"
-     },
-     {
-       "type": "Application",
-       "labels":  ["Application_AGROVOC"],
-       "bgColor": "orange",
-       "borderColor": "darken"
-     },
-     {
-       "type": "Biological",
-       "labels":  ["Biological_AGROVOC"],
-       "bgColor": "orange",
-       "borderColor": "darken"
-     },
-     {
-       "type": "Breeding",
-       "labels":  ["Breeding_AGROVOC"],
-       "bgColor": "orange",
-       "borderColor": "darken"
-     },
-     {
-       "type": "Chemical",
-       "labels":  ["Chemical_AGROVOC"],
-       "bgColor": "orange",
-       "borderColor": "darken"
-     },
-     {
-       "type": "Computer",
-       "labels":  ["Computer_AGROVOC"],
-       "bgColor": "orange",
-       "borderColor": "darken"
-     },
-     {
-       "type": "Equipment",
-       "labels":  ["Equipment_AGROVOC"],
-       "bgColor": "orange",
-       "borderColor": "darken"
-     },
-     {
-       "type": "Feeding",
-       "labels":  ["Feeding_AGROVOC"],
-       "bgColor": "orange",
-       "borderColor": "darken"
-     },
-     {
-       "type": "Fishing",
-       "labels":  ["Fishing_AGROVOC"],
-       "bgColor": "orange",
-       "borderColor": "darken"
-     },
-     {
-       "type": "Groups",
-       "labels":  ["Groups_AGROVOC"],
-       "bgColor": "orange",
-       "borderColor": "darken"
-     },
-     {
-       "type": "HumanResources",
-       "labels":  ["HumanResources_AGROVOC"],
-       "bgColor": "orange",
-       "borderColor": "darken"
-     },
-     {
-       "type": "Information",
-       "labels":  ["Information_AGROVOC"],
-       "bgColor": "orange",
-       "borderColor": "darken"
-     },
-     {
-       "type": "Measure",
-       "labels":  ["Measure_AGROVOC"],
-       "bgColor": "orange",
-       "borderColor": "darken"
-     },
-     {
-       "type": "Natural",
-       "labels":  ["Natural_AGROVOC"],
-       "bgColor": "orange",
-       "borderColor": "darken"
-     },
-     {
-       "type": "Plant",
-       "labels":  ["Plant_AGROVOC"],
-       "bgColor": "orange",
-       "borderColor": "darken"
-     },
-     {
-       "type": "Population",
-       "labels":  ["Population_AGROVOC"],
-       "bgColor": "orange",
-       "borderColor": "darken"
-     },
-     {
-       "type": "Research",
-       "labels":  ["Research_AGROVOC"],
-       "bgColor": "orange",
-       "borderColor": "darken"
-     },
-     {
-       "type": "Site",
-       "labels":  ["Site_AGROVOC"],
-       "bgColor": "orange",
-       "borderColor": "darken"
-     },
-     {
-       "type": "Stages",
-       "labels":  ["Stages_AGROVOC"],
-       "bgColor": "orange",
-       "borderColor": "darken"
-     },
-     {
-       "type": "Technology",
-       "labels":  ["Technology_AGROVOC"],
-       "bgColor": "orange",
-       "borderColor": "darken"
-     }
-
+        {
+            "type"   : "GeoidPhrases",
+            "labels" : ["GeoidPhrases", "GEOLOC"],
+            // Blue is a nice colour for a person?
+            //"bgColor": "thistle",
+            "bgColor": geoLocationColor,
+            // Use a slightly darker version of the bgColor for the border
+            "borderColor": "darken"
+         },
     ],
 
     event_types: [

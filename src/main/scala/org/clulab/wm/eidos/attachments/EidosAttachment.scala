@@ -2,21 +2,16 @@ package org.clulab.wm.eidos.attachments
 
 import org.clulab.odin.{Attachment, EventMention, Mention, TextBoundMention}
 import org.clulab.wm.eidos.Aliases.Quantifier
+import org.clulab.wm.eidos.context.GeoPhraseID
 import org.clulab.wm.eidos.document.{DCT, TimeInterval}
-import org.clulab.wm.eidos.serialization.json.{
-  JLDAttachment => JLDEidosAttachment,
-  JLDScoredAttachment => JLDEidosScoredAttachment,
-  JLDTriggeredAttachment => JLDEidosTriggeredAttachment,
-  JLDSerializer => JLDEidosSerializer,
-  JLDContextAttachment => JLDEidosContextAttachment
-}
+import org.clulab.wm.eidos.serialization.json.{JLDAttachment => JLDEidosAttachment, JLDContextAttachment => JLDEidosContextAttachment, JLDScoredAttachment => JLDEidosScoredAttachment, JLDSerializer => JLDEidosSerializer, JLDTriggeredAttachment => JLDEidosTriggeredAttachment}
+
 import org.json4s._
 import org.json4s.JsonDSL._
 
 import scala.beans.BeanProperty
 import scala.annotation.tailrec
 import scala.util.hashing.MurmurHash3.{mix, mixLast}
-import org.clulab.wm.eidos.document.TimeInterval
 
 @SerialVersionUID(1L)
 abstract class EidosAttachment extends Attachment with Serializable {
@@ -64,7 +59,7 @@ object EidosAttachment {
       case Property.label => new Property(trigger, someQuantifications)
       case Hedging.label => new Hedging(trigger, someQuantifications)
       case Negation.label => new Negation(trigger, someQuantifications)
-      case Location.label => new Location(trigger, someQuantifications)
+      case Location.label => new LocationTM(trigger, someQuantifications)
       case Organization.label => new Organization(trigger, someQuantifications)
     }
   }
@@ -77,11 +72,20 @@ object EidosAttachment {
       .arguments
       .get("quantifier")
       .map(qs => qs.map(_.text))
+
+  def getAttachmentWords(a: Attachment): Seq[String] = {
+    a match {
+      case triggered: TriggeredAttachment => Seq(triggered.trigger) ++ triggered.quantifiers.getOrElse(Seq())
+      case context: ContextAttachment => context.text.split(" ")
+      case _ => throw new RuntimeException(s"Unsupported class of attachment: ${a.getClass}")
+    }
+  }
 }
 
 case class AttachmentInfo(triggerText: String, quantifierTexts: Option[Seq[String]] = None,
     triggerMention: Option[TextBoundMention] = None, quantifierMentions: Option[Seq[Mention]] = None)
 
+@SerialVersionUID(1L)
 abstract class TriggeredAttachment(@BeanProperty val trigger: String, @BeanProperty val quantifiers: Option[Seq[String]],
     triggerMention: Option[TextBoundMention] = None, quantifierMentions: Option[Seq[Mention]]) extends EidosAttachment {
 
@@ -133,6 +137,7 @@ abstract class TriggeredAttachment(@BeanProperty val trigger: String, @BeanPrope
 
     someTriggerMentions ++ someQuantifierMentions
   }
+
   def toJson(label: String): JValue = {
     val quants =
       if (quantifiers.isDefined) quantifiers.get.map(quantifier => JString(quantifier))
@@ -208,6 +213,7 @@ object TriggeredAttachment {
   }
 }
 
+@SerialVersionUID(1L)
 class Quantification(trigger: String, quantifiers: Option[Seq[String]], triggerMention: Option[TextBoundMention] = None,
     quantifierMentions: Option[Seq[Mention]] = None) extends TriggeredAttachment(trigger, quantifiers, triggerMention, quantifierMentions) {
 
@@ -233,6 +239,8 @@ object Quantification {
   }
 }
 
+
+@SerialVersionUID(1L)
 class Increase(trigger: String, quantifiers: Option[Seq[String]], triggerMention: Option[TextBoundMention] = None,
     quantifierMentions: Option[Seq[Mention]] = None) extends TriggeredAttachment(trigger, quantifiers, triggerMention, quantifierMentions) {
 
@@ -258,6 +266,7 @@ object Increase {
   }
 }
 
+@SerialVersionUID(1L)
 class Decrease(trigger: String, quantifiers: Option[Seq[String]], triggerMention: Option[TextBoundMention] = None,
     quantifierMentions: Option[Seq[Mention]] = None) extends TriggeredAttachment(trigger, quantifiers, triggerMention, quantifierMentions) {
 
@@ -283,6 +292,8 @@ object Decrease {
   }
 }
 
+
+@SerialVersionUID(1L)
 class Property(trigger: String, quantifiers: Option[Seq[String]], triggerMention: Option[TextBoundMention] = None,
                quantifierMentions: Option[Seq[Mention]] = None) extends TriggeredAttachment(trigger, quantifiers, triggerMention, quantifierMentions) {
 
@@ -308,31 +319,34 @@ object Property {
   }
 }
 
-class Location(trigger: String, quantifiers: Option[Seq[String]], triggerMention: Option[TextBoundMention] = None,
+
+@SerialVersionUID(1L)
+class LocationTM(trigger: String, quantifiers: Option[Seq[String]], triggerMention: Option[TextBoundMention] = None,
                quantifierMentions: Option[Seq[Mention]] = None) extends TriggeredAttachment(trigger, quantifiers, triggerMention, quantifierMentions) {
 
-  override def canEqual(other: Any): Boolean = other.isInstanceOf[Location]
+  override def canEqual(other: Any): Boolean = other.isInstanceOf[LocationTM]
 
   override def newJLDAttachment(serializer: JLDEidosSerializer): JLDEidosAttachment =
-    newJLDTriggeredAttachment(serializer, Location.kind)
+    newJLDTriggeredAttachment(serializer, LocationTM.kind)
 
-  override def toJson(): JValue = toJson(Location.label)
+  override def toJson(): JValue = toJson(LocationTM.label)
 }
 
-object Location {
+object LocationTM {
   val label = "Location"
   val kind = "LOCATION"
   val argument = "quantifier"
 
-  def apply(trigger: String, quantifiers: Option[Seq[String]]) = new Location(trigger, quantifiers)
+  def apply(trigger: String, quantifiers: Option[Seq[String]]) = new LocationTM(trigger, quantifiers)
 
-  def apply(mention: Mention): Location = {
+  def apply(mention: Mention): LocationTM = {
     val attachmentInfo = TriggeredAttachment.getAttachmentInfo(mention, argument)
 
-    new Location(attachmentInfo.triggerText, attachmentInfo.quantifierTexts, attachmentInfo.triggerMention, attachmentInfo.quantifierMentions)
+    new LocationTM(attachmentInfo.triggerText, attachmentInfo.quantifierTexts, attachmentInfo.triggerMention, attachmentInfo.quantifierMentions)
   }
 }
 
+@SerialVersionUID(1L)
 class Organization(trigger: String, quantifiers: Option[Seq[String]], triggerMention: Option[TextBoundMention] = None,
                quantifierMentions: Option[Seq[Mention]] = None) extends TriggeredAttachment(trigger, quantifiers, triggerMention, quantifierMentions) {
 
@@ -358,63 +372,9 @@ object Organization {
   }
 }
 
-
-abstract class ContextAttachment() extends EidosAttachment {
-
-  val text: String
-  val value: Object
-
-  override def toString() = {
-    getClass().getSimpleName() + "(" + text + ")"
-  }
-
-  def newJLDContextAttachment(serializer: JLDEidosSerializer, kind: String): JLDEidosContextAttachment =
-    new JLDEidosContextAttachment(serializer, kind, this)
-
-  def toJson(label: String): JValue = {
-    (EidosAttachment.TYPE -> label)
-  }
-}
-
-class Time(interval: TimeInterval) extends ContextAttachment {
-
-  val text = interval.text
-  val value = interval
-
-  override def newJLDAttachment(serializer: JLDEidosSerializer): JLDEidosAttachment =
-    newJLDContextAttachment(serializer, Time.kind)
-
-  override def toJson(): JValue = toJson(Time.label)
-}
-
-object Time {
-  val label = "Time"
-  val kind = "TIMEX"
-
-  def apply(interval: TimeInterval) = new Time(interval)
-}
-
-class DCTime(dct: DCT) extends ContextAttachment {
-
-  val text = dct.text
-  val value = dct
-
-  override def newJLDAttachment(serializer: JLDEidosSerializer): JLDEidosAttachment =
-    newJLDContextAttachment(serializer, DCTime.kind)
-
-  override def toJson(): JValue = toJson(DCTime.label)
-}
-
-object DCTime {
-  val label = "Time"
-  val kind = "TIMEX"
-
-  def apply(dct: DCT) = new DCTime(dct)
-}
-
-
+@SerialVersionUID(1L)
 class Hedging(trigger: String, quantifiers: Option[Seq[String]], triggerMention: Option[TextBoundMention] = None,
-  quantifierMentions: Option[Seq[Mention]] = None) extends TriggeredAttachment(trigger, quantifiers, triggerMention, quantifierMentions) {
+              quantifierMentions: Option[Seq[Mention]] = None) extends TriggeredAttachment(trigger, quantifiers, triggerMention, quantifierMentions) {
 
   override def canEqual(other: Any): Boolean = other.isInstanceOf[Hedging]
 
@@ -422,7 +382,6 @@ class Hedging(trigger: String, quantifiers: Option[Seq[String]], triggerMention:
 
   override def toJson(): JValue = toJson(trigger)
 }
-
 
 object Hedging {
   val label = "Hedging"
@@ -432,8 +391,9 @@ object Hedging {
 
 }
 
+@SerialVersionUID(1L)
 class Negation(trigger: String, quantifiers: Option[Seq[String]], triggerMention: Option[TextBoundMention] = None,
-              quantifierMentions: Option[Seq[Mention]] = None) extends TriggeredAttachment(trigger, quantifiers, triggerMention, quantifierMentions) {
+               quantifierMentions: Option[Seq[Mention]] = None) extends TriggeredAttachment(trigger, quantifiers, triggerMention, quantifierMentions) {
 
   override def canEqual(other: Any): Boolean = other.isInstanceOf[Negation]
 
@@ -448,9 +408,189 @@ object Negation {
   val kind = "NEGATION"
 
   def apply(trigger: String, quantifiers: Option[Seq[String]]) = new Negation(trigger, quantifiers)
-
 }
 
+@SerialVersionUID(1L)
+abstract class ContextAttachment(val text: String, val value: Object) extends EidosAttachment {
+
+  override def toString() = {
+    getClass().getSimpleName() + "(" + text + ")"
+  }
+
+  def newJLDContextAttachment(serializer: JLDEidosSerializer, kind: String): JLDEidosContextAttachment =
+    new JLDEidosContextAttachment(serializer, kind, this)
+
+  def toJson(label: String): JValue = {
+    (EidosAttachment.TYPE -> label)
+  }
+
+  def canEqual(other: Any): Boolean
+
+  override def equals(other: Any): Boolean = other match {
+    case that: ContextAttachment =>
+      that.canEqual(this) &&
+        this.text == that.text
+    case _ => false
+  }
+
+  def hashCode(initial: Int, rest: Int): Int = {
+    mixLast(initial, rest)
+  }
+
+  override def hashCode: Int = { // Add rest of hash here?
+    val h0 = getClass().getName().##
+
+    mix(h0, text.##)
+  }
+}
+
+object ContextAttachment {
+
+  def compare(left: ContextAttachment, right: ContextAttachment): Int =
+      left.getClass().getName().compareTo(right.getClass().getName())
+}
+
+@SerialVersionUID(1L)
+class Time(val interval: TimeInterval) extends ContextAttachment(interval.text, interval) {
+
+  override def newJLDAttachment(serializer: JLDEidosSerializer): JLDEidosAttachment =
+    newJLDContextAttachment(serializer, Time.kind)
+
+  override def toJson(): JValue = toJson(Time.label)
+
+  override def canEqual(other: Any): Boolean = other.isInstanceOf[Time]
+
+  override def equals(other: Any): Boolean = {
+    super.equals(other) && {
+      val that = other.asInstanceOf[Time]
+
+      this.interval.span == that.interval.span // &&
+          // interval.text is already taken care of in super.
+          // Assume that same span results in same intervals.
+          // this.interval.intervals == that.interval.intervals
+    }
+  }
+
+  override def hashCode: Int = {
+    val h0 = super.hashCode
+
+    mixLast(h0, interval.span.##)
+  }
+}
+
+object Time {
+  val label = "Time"
+  val kind = "TIMEX"
+
+  def apply(interval: TimeInterval) = new Time(interval)
+
+  def lessThan(left: Time, right: Time): Boolean =
+    compare(left, right) < 0
+
+  def compare(left: Time, right: Time): Int = {
+    val superDiff = ContextAttachment.compare(left, right)
+
+    if (superDiff != 0)
+      superDiff
+    else {
+      val startDiff = left.interval.span._1 - right.interval.span._1
+
+      if (startDiff != 0)
+        startDiff
+      else {
+        val endDiff = left.interval.span._2 - right.interval.span._2
+
+        endDiff
+      }
+    }
+  }
+}
+
+@SerialVersionUID(1L)
+class Location(val geoPhraseID: GeoPhraseID) extends ContextAttachment(geoPhraseID.text, geoPhraseID) {
+
+  override def newJLDAttachment(serializer: JLDEidosSerializer): JLDEidosAttachment =
+    newJLDContextAttachment(serializer, Location.kind)
+
+  override def toJson(): JValue = toJson(Location.label)
+
+  override def canEqual(other: Any): Boolean = other.isInstanceOf[Location]
+
+  override def equals(other: Any): Boolean = {
+    super.equals(other) && {
+      val that = other.asInstanceOf[Location]
+
+      this.geoPhraseID == that.geoPhraseID // Case classes support this.
+    }
+  }
+
+  override def hashCode: Int = {
+    val h0 = super.hashCode
+
+    mix(h0, geoPhraseID.##)
+  }
+}
+
+object Location {
+  val label = "Location"
+  val kind = "LocationExp"
+
+  def apply(interval: GeoPhraseID) = new Location(interval)
+
+  def lessThan(left: Location, right: Location): Boolean =
+    compare(left, right) < 0
+
+  def compare(left: Location, right: Location): Int = {
+    val superDiff = ContextAttachment.compare(left, right)
+
+    if (superDiff != 0)
+      superDiff
+    else {
+      val startDiff = left.geoPhraseID.startOffset - right.geoPhraseID.startOffset
+
+      if (startDiff != 0)
+        startDiff
+      else {
+        val endDiff = left.geoPhraseID.endOffset - right.geoPhraseID.endOffset
+
+        endDiff
+      }
+    }
+  }
+}
+
+@SerialVersionUID(1L)
+class DCTime(val dct: DCT) extends ContextAttachment(dct.text, dct) {
+
+  override def newJLDAttachment(serializer: JLDEidosSerializer): JLDEidosAttachment =
+    newJLDContextAttachment(serializer, DCTime.kind)
+
+  override def toJson(): JValue = toJson(DCTime.label)
+
+  // Just compare the texts which should determine the Intervals.
+  override def canEqual(other: Any): Boolean = other.isInstanceOf[DCTime]
+}
+
+object DCTime {
+  val label = "Time"
+  val kind = "TIMEX"
+
+  def apply(dct: DCT) = new DCTime(dct)
+
+  def lessThan(left: DCTime, right: DCTime): Boolean =
+    compare(left, right) < 0
+
+  def compare(left: DCTime, right: DCTime): Int = {
+    val superDiff = ContextAttachment.compare(left, right)
+
+    if (superDiff != 0)
+      superDiff
+    else
+      left.text.compareTo(right.text)
+  }
+}
+
+@SerialVersionUID(1L)
 case class Score(score: Double) extends EidosAttachment {
 
   override def newJLDAttachment(serializer: JLDEidosSerializer): JLDEidosAttachment =

@@ -3,6 +3,7 @@
   - Agrovoc
   - Concept
   - Organization
+- Property
 - Quantifier
 - Location
 - Event:
@@ -15,6 +16,7 @@
     - Increase
     - Decrease
     - Time
+    - Location
   - EntityLinker:
     - SimpleEvent:
       - Protest

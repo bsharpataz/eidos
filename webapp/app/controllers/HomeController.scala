@@ -1,21 +1,30 @@
 package controllers
 
 import javax.inject._
+
+import com.typesafe.config.ConfigRenderOptions
+
 import org.clulab.odin._
 import org.clulab.processors.{Document, Sentence}
+import org.clulab.serialization.DocumentSerializer
+
 import org.clulab.wm.eidos.EidosSystem
 import org.clulab.wm.eidos.BuildInfo
 import org.clulab.wm.eidos.attachments._
 import org.clulab.wm.eidos.Aliases._
+import org.clulab.wm.eidos.context.GeoPhraseID
 import org.clulab.wm.eidos.document.EidosDocument
 import org.clulab.wm.eidos.document.TimeInterval
-
 import org.clulab.wm.eidos.groundings.EidosOntologyGrounder
 import org.clulab.wm.eidos.mentions.EidosMention
-import org.clulab.wm.eidos.utils.{DisplayUtils, DomainParams, GroundingUtils}
-import com.typesafe.config.ConfigRenderOptions
+import org.clulab.wm.eidos.utils.{DisplayUtils, DomainParams, GroundingUtils, PlayUtils}
+
 import play.api.mvc._
 import play.api.libs.json._
+
+import org.clulab.wm.eidos.serialization.json.WMJSONSerializer
+import org.clulab.wm.eidos.serialization.json.JLDCorpus
+import org.clulab.serialization.json.stringify
 
 /**
  * This controller creates an `Action` to handle HTTP requests to the
@@ -28,7 +37,7 @@ class HomeController @Inject()(cc: ControllerComponents) extends AbstractControl
   // -------------------------------------------------
   println("[EidosSystem] Initializing the EidosSystem ...")
   val ieSystem = new EidosSystem()
-  var proc = ieSystem.proc
+  val proc = ieSystem.proc
   println("[EidosSystem] Completed Initialization ...")
   // -------------------------------------------------
 
@@ -92,6 +101,31 @@ class HomeController @Inject()(cc: ControllerComponents) extends AbstractControl
     (doc, mentions.sortBy(m => mentionOrder(m.odinMention)), groundedEntities)
   }
 
+// Webservice functions
+  def process_text = Action(parse.json) { request =>
+    (request.body \ "text").asOpt[String].map { text =>
+      val (mentionsJSONLD) = processPlaytext(ieSystem, text)
+      val (parsed_output) = PlayUtils.toPlayJson(mentionsJSONLD)
+      Ok(parsed_output)
+    }.getOrElse {
+      BadRequest("Missing parameter [text]")
+    }
+  }
+
+  // Method where eidos processing for webservice happens
+  def processPlaytext(
+    ieSystem: EidosSystem,
+    text: String): (org.json4s.JsonAST.JValue) = {
+
+    // preprocessing
+    println(s"Processing sentence : ${text}" )
+    val annotatedDocument = ieSystem.extractFromText(text)
+
+    // Export to JSON-LD
+    val corpus = new JLDCorpus(Seq(annotatedDocument), ieSystem)
+    val mentionsJSONLD = corpus.serialize()
+    (mentionsJSONLD)
+  }
 
   case class GroundedEntity(sentence: String,
                             quantifier: Quantifier,
@@ -246,8 +280,8 @@ class HomeController @Inject()(cc: ControllerComponents) extends AbstractControl
         "entities" -> mkJsonFromTokens(doc),
         "relations" -> mkJsonFromDependencies(doc)
       )
-    val eidosJsonObj = mkJsonForEidos(text, sent, eidosMentions.map(_.odinMention), doc.asInstanceOf[EidosDocument].times)
-    val groundedAdjObj = mkGroundedObj(groundedEntities, eidosMentions, doc.asInstanceOf[EidosDocument].times)
+    val eidosJsonObj = mkJsonForEidos(text, sent, eidosMentions.map(_.odinMention), doc.asInstanceOf[EidosDocument].times, doc.asInstanceOf[EidosDocument].geolocs)
+    val groundedAdjObj = mkGroundedObj(groundedEntities, eidosMentions, doc.asInstanceOf[EidosDocument].times, doc.asInstanceOf[EidosDocument].geolocs)
     val parseObj = mkParseObj(doc)
 
     // These print the html and it's a mess to look at...
@@ -261,7 +295,7 @@ class HomeController @Inject()(cc: ControllerComponents) extends AbstractControl
     )
   }
 
-  def mkGroundedObj(groundedEntities: Vector[GroundedEntity], mentions: Vector[EidosMention], time: Array[List[TimeInterval]]): String = {
+  def mkGroundedObj(groundedEntities: Vector[GroundedEntity], mentions: Vector[EidosMention], time: Option[Array[Seq[TimeInterval]]], location: Option[Array[Seq[GeoPhraseID]]]): String = {
 
     var objectToReturn = ""
 
@@ -294,9 +328,18 @@ class HomeController @Inject()(cc: ControllerComponents) extends AbstractControl
 
     // TimeExpressions
     objectToReturn += "<h2>Found TimeExpressions:</h2>"
-    for (t <-time) {
-      objectToReturn += s"${DisplayUtils.webAppTimeExpressions(t)}"
-    }
+    if (time.isDefined)
+      time.get.foreach { t =>
+        objectToReturn += s"${DisplayUtils.webAppTimeExpressions(t)}"
+      }
+
+    // GeoLocations
+    objectToReturn += "<h2>Found GeoLocations:</h2>"
+    if (location.isDefined)
+      location.get.foreach { l =>
+        objectToReturn += s"${DisplayUtils.webAppGeoLocations(l)}"
+      }
+
 
     // Concepts
     val entities = mentions.filter(_.odinMention matches "Entity")
@@ -337,7 +380,7 @@ class HomeController @Inject()(cc: ControllerComponents) extends AbstractControl
     objectToReturn
   }
 
-  def mkJsonForEidos(sentenceText: String, sent: Sentence, mentions: Vector[Mention], time: Array[List[TimeInterval]]): Json.JsValueWrapper = {
+  def mkJsonForEidos(sentenceText: String, sent: Sentence, mentions: Vector[Mention], time: Option[Array[Seq[TimeInterval]]], location: Option[Array[Seq[GeoPhraseID]]]): Json.JsValueWrapper = {
     val topLevelTBM = mentions.collect { case m: TextBoundMention => m }
 
     // collect event mentions for display
@@ -372,6 +415,8 @@ class HomeController @Inject()(cc: ControllerComponents) extends AbstractControl
       "text" -> sentenceText,
       "entities" -> mkJsonFromEntities(entities ++ topLevelTBM, tbMentionToId),
       "timexs" -> mkJsonFromTimeExpressions(time),
+      "geoexps" -> mkJsonFromLocationExpressions(location),
+
       "triggers" -> mkJsonFromEntities(triggers, tbMentionToId),
       "events" -> mkJsonFromEventMentions(events, tbMentionToId),
       "relations" -> mkJsonFromRelationMentions(relations, tbMentionToId)
@@ -435,24 +480,41 @@ class HomeController @Inject()(cc: ControllerComponents) extends AbstractControl
     )
   }
 
-  def mkJsonFromTimeExpressions(time: Array[List[TimeInterval]]): Json.JsValueWrapper = {
-    var x = 0
-    val timexs = for (t <- time; i <- t) yield {
-      x += 1
-      Json.arr(
-        s"X$x",
-        "TimeExpression",
-        Json.arr(Json.arr(i.span._1,i.span._2)),
-        Json.toJson(for(d <- i.intervals) yield ((
-          d._1 match {
-          case null => "Undef"
-          case start => start.toString},
-          d._2 match {
-          case null => "Undef"
-          case end => end.toString},
-          d._3)))
-      )}
-    Json.toJson(timexs)
+  def mkJsonFromTimeExpressions(time: Option[Array[Seq[TimeInterval]]]): Json.JsValueWrapper = {
+    val result = time.map { time =>
+      var x = 0
+      val timexs = for (t <- time; i <- t) yield {
+        x += 1
+        Json.arr(
+          s"X$x",
+          "TimeExpression",
+          Json.arr(Json.arr(i.span._1, i.span._2)),
+          Json.toJson(for (d <- i.intervals) yield ((
+              Option(d._1).map(_.toString).getOrElse("Undef"),
+              Option(d._2).map(_.toString).getOrElse("Undef"),
+              d._3)))
+        )
+      }
+      Json.toJson(timexs)
+    }.getOrElse(Json.toJson(Json.arr()))
+    result
+  }
+
+  def mkJsonFromLocationExpressions(location: Option[Array[Seq[GeoPhraseID]]]): Json.JsValueWrapper = {
+    val result = location.map { location =>
+      var x = 0
+      val timexs = for (t <- location; i <- t) yield {
+        x += 1
+        Json.arr(
+          s"X$x",
+          "x",
+          Json.arr(Json.arr(i.startOffset, i.endOffset)),
+          Json.toJson(i.geonameID)
+        )
+      }
+      Json.toJson(timexs)
+    }.getOrElse(Json.toJson(Json.arr()))
+    result
   }
 
 

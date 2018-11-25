@@ -15,10 +15,9 @@ class TestResources extends Test {
 
     it should "not have any Unicode characters in " + path in {
       val stream = Source.fromFile(file, "utf8")
-      var lineNo = 0
-      var count = 0
-
-      stream.getLines().foreach { line =>
+      val count = stream.getLines().zipWithIndex.foldRight(0) { (lineAndLineNo, sum) =>
+        val line = lineAndLineNo._1
+        val lineNo = lineAndLineNo._2
         val badCharAndIndex = line.zipWithIndex.filter { case (c: Char, index: Int) =>
           (c < 32 || 127 < c) && c != '\r' && c != '\n' && c != '\t'
         }
@@ -26,9 +25,8 @@ class TestResources extends Test {
           "'" + c + "' found at index " + index + "."
         }
 
-        lineNo += 1
-        complaints.foreach(complaint => println("Line " + lineNo + ": " + complaint))
-        count += complaints.size
+        complaints.foreach(complaint => println("Line " + (lineNo + 1) + ": " + complaint))
+        sum + complaints.size
       }
 
       count should be (0)
@@ -39,7 +37,8 @@ class TestResources extends Test {
   type Operation = (File) => Unit
 
   val wantedSuffixes = Seq(".conf", ".yml", ".tsv", ".kb", ".txt")
-  val unwantedSuffixes = Seq("vectors.txt", "_2016.txt", "/portuguese/grammars/triggers.yml", "/portuguese/grammars/triggers-temp-translation.yml")
+  val unwantedSuffixes = Seq("vectors.txt", "_2016.txt", "/portuguese/grammars/triggers.yml",
+                              "geo_dict_with_population_SOUTH_SUDAN.txt", "word2idx_file.txt")
 
   def fileMatches(file: File): Boolean = {
     val canonicalPath = file.getCanonicalPath().replace('\\', '/')
@@ -52,7 +51,7 @@ class TestResources extends Test {
   
   def doOperation(path: String)(operation: Operation): Unit = {
     for (files <- Option(new File(path).listFiles); file <- files) {
-        if (file.isFile() && fileMatches(file))
+        if (file.isFile() && fileMatches(file) && file.getAbsolutePath.contains("english"))
           operation(file)
         if (file.isDirectory && directoryMatches(file))
           doOperation(file.getAbsolutePath)(operation)

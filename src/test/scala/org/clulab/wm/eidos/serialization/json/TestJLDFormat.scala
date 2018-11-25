@@ -5,21 +5,19 @@ import java.util.{HashMap => JHashMap}
 import org.clulab.serialization.json.stringify
 import org.clulab.wm.eidos.AnnotatedDocument
 import org.clulab.wm.eidos.EidosSystem.Corpus
-import org.clulab.wm.eidos.test.TestUtils
-import org.clulab.wm.eidos.test.TestUtils.Test
-import org.clulab.wm.eidos.text.cag.CAG._
+import org.clulab.wm.eidos.text.english.cag.CAG._
 import com.github.jsonldjava.core.JsonLdOptions
 import com.github.jsonldjava.core.JsonLdProcessor
 import com.github.jsonldjava.utils.JsonUtils
+import org.clulab.wm.eidos.test.TestUtils.ExtractionTest
 
 import scala.collection.Seq
 
-class TestJLDFormat extends Test {
+class TestJLDFormat extends ExtractionTest {
   
   def newTitledAnnotatedDocument(text: String): AnnotatedDocument = newTitledAnnotatedDocument(text, text)
   
   def newTitledAnnotatedDocument(text: String, title: String): AnnotatedDocument = {
-    val ieSystem = TestUtils.ieSystem
     val annotatedDocument = ieSystem.extractFromText(text)
 
     annotatedDocument.document.id = Some(title)
@@ -27,7 +25,7 @@ class TestJLDFormat extends Test {
   }
   
   def serialize(corpus: Corpus): String = {
-    val jldCorpus = new JLDCorpus(corpus, TestUtils.ieSystem)
+    val jldCorpus = new JLDCorpus(corpus, ieSystem)
     val jValue = jldCorpus.serialize()
     stringify(jValue, pretty = true)
   }
@@ -41,7 +39,9 @@ class TestJLDFormat extends Test {
     // See https://github.com/jsonld-java/jsonld-java
     // Read the string into an Object (The type of this object will be a List, Map, String, Boolean,
     // Number or null depending on the root object in the file).
-    val jsonObject = JsonUtils.fromString(json)
+    val jsonObject = Option(JsonUtils.fromString(json))
+        .getOrElse(throw new Exception("jsonObject is empty"))
+
     // Create a context JSON map containing prefixes and definitions
     val context = new JHashMap()
     // Customise context...

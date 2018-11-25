@@ -1,18 +1,19 @@
-increase_triggers: "aceler|acrescent|agrav|ajud|ampli|aperfeiço|apoi|aprimor|aument|auxili|comp[õô]|compo(r|n|m)|compu[ns]|contribu|dobr|elev|espalh|estend|estimul|exacerb|exorbit|facilit|favorec|impulsion|increment|melhor|prolong|promov|propag|reativ|restaur"
-noncausal_increase_triggers: "acima|melhor|bom|maior|forte|aument|difundido"
+increase_triggers: "aceler|acrescent|agrav|ajud|ampli|aperfeiço|apoi|aprimor|aument|auxili|benefici|comp[õô]|compo(n|m)|compor$|compu[ns]|contribu|dobr|elev|estend|estimul|exacerb|exorbit|facilit|favorec|impulsion|increment|intensifi|melhor|prolong|perpetu|promov|propag|reativ|restaur|otimiz|maximiz|normaliz"
 
-decrease_triggers: "abaix|abol|acab|anul|apag|atenu|bloque|cancel|cess|corr|cort|debilit|degener|degrad|depreci|desaceler|desativ|desestabiliz|destru|desvaloriz|dificult|diminu|dizim|elimin|encolh|encurt|enfraquec|esgot|exaur|imped|inib|invalid|limit|mitig|neg|paraliz|pior|prejudic|previn|quebr|rebaix|reduz|reprim|restring|retard|revert|revog|romp|suprim"
-noncausal_decrease_triggers: "ausencia|baix|declínio|déficit|derrub|desadequ|desativ|descontinu|deslig|escassez|escass|falha|falta|inadequ|inativ|interrompe|perda|pobre|recessão"
-#advers|perturb|resist|
+noncausal_increase_triggers: "acima|melhor|bom|boa|maior|forte|aument|difundid|alt(o|a|os|as)"
 
-# NOTE led by itself matches sealed, so we need to anchor it, i.e. ^led$
-cause_triggers: "ajud|ativ|auxili|catalis|caus|colabor|conduz|contribu|deduz|desencade|facilit|forç|induz|inici|interconvert|lev|medi|modul|permit|possibilit|provoc|sinaliz"
+decrease_triggers: "abol|anul|apag|atenu|bloque|cancel|combat|cess|debilit|degener|degrad|depreci|desaceler|desativ|desestabiliz|destru|desvaloriz|dificult|diminu|dizim|elimin|encolh|encurt|enfraquec|esgot|exaur|imped|inib|invalid|limit|mitig|paraliz|pior|prejudic|preven|previn|rebaix|reduz|reprim|restring|retard|revert|revog|suprim"
+
+noncausal_decrease_triggers: "ausencia|baix|declínio|déficit|derrub|desadequ|desativ|descontinu|deslig|escassez|escass|falha|falta|inadequ|inativ|interromp|menor|perda|pobre|recessão|redução"
+
+cause_triggers: "ajud|ativ(a|ou|am|aram|ado|ada)$|auxili|catalis|caus|colabor|conduz|contribu|deduz|desencade|facilit|forç|induz|interconvert|lev|modul|permit|possibilit|provoc|sinaliz|proporcion|propici|ocasion|acarretou"
 
 nonavoid_causal_triggers: "produz"
+
 reverse_direction_cause_triggers: "consequencia|efeito|resultado"
 
 affect_triggers: "afet|alter|desloc|influenci|modifi|modificação"
+
 nonavoid_affect_triggers: "impact"
 
 correlation_triggers: "coincid|lig"
-
