@@ -34,10 +34,9 @@ class GraphTester(ieSystem: EidosSystem, text: String) {
   }
 
   protected def toString(mentions: Seq[Mention]): String = {
-    val stringBuilder = new StringBuilder()
-
-    mentions.indices.foreach(index => stringBuilder.append(s"$index: ${mentions(index).text}\n"))
-    stringBuilder.toString()
+    mentions.zipWithIndex.map{case (mention, index) => {
+      s"$index: ${mention.text} ${mention.attachments.mkString(", ")}"
+    }}.mkString("\n")
   }
 
   protected def annotateTest(result: Seq[String]): Seq[String] =
@@ -58,6 +57,6 @@ class GraphTester(ieSystem: EidosSystem, text: String) {
     annotateTest(testResult.complaints)
   }
 
-  def useTimeNorm: Boolean = ieSystem.timenorm.isDefined
-  def useGeoNorm: Boolean = ieSystem.geonorm.isDefined
+  def useTimeNorm: Boolean = ieSystem.loadableAttributes.timenorm.isDefined
+  def useGeoNorm: Boolean = ieSystem.loadableAttributes.geonorm.isDefined
 }

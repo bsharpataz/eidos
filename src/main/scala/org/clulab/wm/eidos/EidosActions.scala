@@ -29,12 +29,10 @@ import scala.util.matching.Regex
 
 class EidosActions(val taxonomy: Taxonomy, val expansionHandler: ExpansionHandler) extends Actions with LazyLogging {
 
-
   /*
       Global Action -- performed after each round in Odin
   */
   def globalAction(mentions: Seq[Mention], state: State): Seq[Mention] = {
-
     // expand arguments
     val (expandable, textBounds) = mentions.partition(m => EidosSystem.CAG_EDGES.contains(m.label))
     val expanded = expansionHandler.expandArguments(expandable, state)
@@ -129,7 +127,6 @@ class EidosActions(val taxonomy: Taxonomy, val expansionHandler: ExpansionHandle
     prevSentenceMentions.filter(_ matches EidosSystem.CAUSAL_LABEL)
   }
 
-
   def createEventChain(causal: Seq[Mention], arg1: String, arg2: String): Seq[Mention] = {
     val arg1Mentions = State(causal.flatMap(_.arguments.getOrElse(arg1, Nil)))
     // replace event causes with captured effects if possible
@@ -159,7 +156,6 @@ class EidosActions(val taxonomy: Taxonomy, val expansionHandler: ExpansionHandle
 
     assembled.flatten
   }
-
 
   /*
       Filtering Methods
@@ -222,14 +218,13 @@ class EidosActions(val taxonomy: Taxonomy, val expansionHandler: ExpansionHandle
     }
 
     val argumentSize = attachmentsSet.toSeq.map(_.asInstanceOf[EidosAttachment].argumentSize).sum
-    val triggerSize = mention.attachments.toSeq.filter(_.isInstanceOf[TriggeredAttachment]).map(_.asInstanceOf[TriggeredAttachment].trigger.length).sum
+    val triggerSize = mention.attachments.toSeq.collect{ case a: TriggeredAttachment => a.trigger.length}.sum
     val attachArgumentsSz = argumentSize + triggerSize
 
     val res = attachArgumentsSz + modSize + numArgs + mention.tokenInterval.length
 
     res
   }
-
 
   def filterSubstringEntities(entities: Seq[TextBoundMention]): Seq[Mention] = {
 
@@ -319,7 +314,6 @@ class EidosActions(val taxonomy: Taxonomy, val expansionHandler: ExpansionHandle
     val allArgMentions = m.arguments.values.toSeq.flatten.map(mention => mention.attachments.size)
     argTokenInterval(m).length
   }
-
 
   // Remove incomplete Mentions
   def keepMostCompleteEvents(ms: Seq[Mention], state: State): Seq[Mention] = {
@@ -431,7 +425,6 @@ class EidosActions(val taxonomy: Taxonomy, val expansionHandler: ExpansionHandle
     }
   }
 
-
   def applyLocationAttachment(ms: Seq[Mention], state: State): Seq[Mention] = {
     for {
       m <- ms
@@ -445,9 +438,6 @@ class EidosActions(val taxonomy: Taxonomy, val expansionHandler: ExpansionHandle
     }
   }
 
-
-
-
   def debug(ms: Seq[Mention], state: State): Seq[Mention] = {
     println("DEBUG ACTION")
     ms
@@ -455,128 +445,53 @@ class EidosActions(val taxonomy: Taxonomy, val expansionHandler: ExpansionHandle
 
   def getAttachment(mention: Mention): EidosAttachment = EidosAttachment.newEidosAttachment(mention)
 
-//<<<<<<< HEAD
-//  def addSubsumedAttachments(expanded: Mention, state: State): Mention = {
-//    def addAttachments(mention: Mention, attachments: Seq[Attachment], foundByName: String): Mention = {
-//      var out = mention
-//      for {
-//        a <- attachments
-//      } out = out.withAttachment(a)
-//
-//      out match {
-//        case tb: TextBoundMention => tb.copy(foundBy = foundByName)
-//        case rm: RelationMention => rm.copy(foundBy = foundByName)
-//        case em: EventMention => em.copy(foundBy = foundByName)
-//      }
-//    }
-//=======
-//>>>>>>> upstream/master
-
-  def pass(mentions: Seq[Mention], state: State): Seq[Mention] = mentions
-
-//<<<<<<< HEAD
-//    // find mentions of the same label and sentence overlap
-//    val overlapping = state.mentionsFor(expanded.sentence, expanded.tokenInterval)
-//    //    println("Overlapping:")
-//    //    overlapping.foreach(ov => println("  " + ov.text + ", " + ov.foundBy))
-//    val completeFoundBy = compositionalFoundBy(overlapping)
-//
-//    val allAttachments = overlapping.flatMap(m => m.attachments).distinct ++ addAnyOverlappingQuantifiers(expanded, state)
-//    //    println(s"allAttachments: ${allAttachments.mkString(", ")}")
-//    // Add on all attachments
-//    addAttachments(expanded, allAttachments, completeFoundBy)
-//  }
-//
-//=======
-//
-//>>>>>>> upstream/master
-
   def addAnyOverlappingQuantifiers(m: Mention, state: State): Seq[Attachment] = {
     val overlapping = state.mentionsFor(m.sentence, m.tokenInterval)
-//    overlapping.foreach(m => shortDisplay(m))
+    //    overlapping.foreach(m => shortDisplay(m))
     val quants = overlapping.filter(_ matches "Quantifier")
     val quantAttachments = quants.map(quant => Quantification(quant.text, None))
 
-//    println(s"Found ${quantAttachments.length} quant attachments for mention: [${m.text}]")
+    //    println(s"Found ${quantAttachments.length} quant attachments for mention: [${m.text}]")
     quantAttachments
   }
 
-//  // Add the temporal attachments for any temporal expression
-//  def attachTemporal(mention: Mention, state: State): Mention = {
-//    val window = 10
-//    val timeIntervals = mention.document.asInstanceOf[EidosDocument].times(mention.sentence)
-//    var timeAttchment: Option[TimeInterval] = None
-//    for (interval <- timeIntervals)
-//      if (mention.startOffset - interval.span._2 <= window && interval.span._1 - mention.endOffset <= window)
-//        timeAttchment = Some(interval)
-//
-////<<<<<<< HEAD
-////    timeAttchment match {
-////      case None => mention
-////      case Some(t) => mention.withAttachment(new Time(t))
-////    }
-////  }
-////    // Add the dct attachment if there is no temporal attachment
-////    def attachDCT(m: Mention, state: State): Mention = {
-////      val dct = m.document.asInstanceOf[EidosDocument].getDCT()
-////      if (dct.isDefined && m.attachments.filter(_.isInstanceOf[Time]).isEmpty)
-////        m.withAttachment(new DCTime(dct.get))
-////=======
-//        MentionUtils.withOnlyAttachments(bestEntity, filteredAttachments  ++ flattenedContextAttachments)
-//      }
-////>>>>>>> upstream/master
-//      else
-//        m
-//    }
+  def pass(mentions: Seq[Mention], state: State): Seq[Mention] = mentions
 
-    // Currently used as a GLOBAL ACTION in EidosSystem:
-    // Merge many Mentions of a single entity that have diff attachments, so that you have only one entity with
-    // all the attachments.  Also handles filtering of attachments of the same type whose triggers are substrings
-    // of each other.
-    def mergeAttachments(mentions: Seq[Mention], state: State): Seq[Mention] = {
+  // Currently used as a GLOBAL ACTION in EidosSystem:
+  // Merge many Mentions of a single entity that have diff attachments, so that you have only one entity with
+  // all the attachments.  Also handles filtering of attachments of the same type whose triggers are substrings
+  // of each other.
+  def mergeAttachments(mentions: Seq[Mention], state: State): Seq[Mention] = {
 
-      // Get all the entity mentions for this span (i.e. all the "rainfall in Spain" mentions)
-      val (entities, nonentities) = mentions.partition(mention => mention matches "Entity")
-      val entitiesBySpan = entities.groupBy(entity => (entity.sentence, entity.tokenInterval, entity.label))
-      val mergedEntities = for {
-        (_, entities) <- entitiesBySpan
-        // These are now for the same span, so only one should win as the main one.
-        flattenedTriggeredAttachments = entities.flatMap(_.attachments.filter(_.isInstanceOf[TriggeredAttachment]).map(_.asInstanceOf[TriggeredAttachment]))
-        flattenedContextAttachments = entities.flatMap(_.attachments.filter(_.isInstanceOf[ContextAttachment]).map(_.asInstanceOf[ContextAttachment]))
-        filteredAttachments = filterAttachments(flattenedTriggeredAttachments)
-      } yield {
-        if (filteredAttachments.nonEmpty) {
+    // Get all the entity mentions for this span (i.e. all the "rainfall in Spain" mentions)
+    val (entities, nonentities) = mentions.partition(mention => mention matches "Entity")
+    val entitiesBySpan = entities.groupBy(entity => (entity.sentence, entity.tokenInterval, entity.label))
+    val mergedEntities = for {
+      (_, entities) <- entitiesBySpan
+      // These are now for the same span, so only one should win as the main one.
+      flattenedTriggeredAttachments = entities.flatMap(_.attachments.collect{ case a: TriggeredAttachment => a })
+      flattenedContextAttachments = entities.flatMap(_.attachments.collect{ case a: ContextAttachment => a })
+      filteredAttachments = filterAttachments(flattenedTriggeredAttachments)
+    }
+    yield {
+      val bestEntities =
+          if (filteredAttachments.nonEmpty) {
+            val bestAttachment = filteredAttachments.sorted.reverse.head
+            // Since head was used above and there could have been a tie, == should be used below
+            // The tie can be broken afterwards.
+            entities.filter(_.attachments.exists(_ == bestAttachment))
+          }
+          else
+            entities
 
-          val bestAttachment = filteredAttachments.sorted.reverse.head
-          // Since head was used above and there could have been a tie, == should be used below
-          // The tie can be broken afterwards.
-          val bestEntities = entities.filter(_.attachments.exists(_ == bestAttachment))
-          val bestEntity = tieBreaker(bestEntities)
+      MentionUtils.withOnlyAttachments(tieBreaker(bestEntities), filteredAttachments ++ flattenedContextAttachments)
+    }
 
-//          copyWithAttachments(bestEntity, filteredAttachments ++ flattenedContextAttachments)
-          MentionUtils.withOnlyAttachments(bestEntity, filteredAttachments  ++ flattenedContextAttachments)
-        }
-        else
-          tieBreaker(entities)
-      }
 
       val res = keepMostCompleteEvents(mergedEntities.toSeq ++ nonentities, state)
       res
     }
 
-//<<<<<<< HEAD
-//    // Iteratively creates a mention which contains all of the passed in Attachments and no others
-//    def copyWithAttachments(mention: Mention, attachments: Seq[Attachment]): Mention = {
-//      // This is very inefficient, but the interface only allows for adding and subtracting one at a time.
-//      val attachmentless = mention.attachments.foldLeft(mention)((mention, attachment) => mention.withoutAttachment(attachment))
-//
-//      attachments.foldLeft(attachmentless)((mention, attachment) => mention.withAttachment(attachment))
-//    }
-//
-//    // Filter out substring attachments, then keep most complete.
-//    def filterAttachments(attachments: Seq[TriggeredAttachment]): Seq[TriggeredAttachment] = {
-//      attachments
-//=======
   // Filter out substring attachments, then keep most complete.
   def filterAttachments(attachments: Seq[TriggeredAttachment]): Seq[TriggeredAttachment] = {
     attachments
@@ -613,10 +528,9 @@ class EidosActions(val taxonomy: Taxonomy, val expansionHandler: ExpansionHandle
         }
     }
 
-    // Get trigger from an attachment
-    protected def triggerOf(attachment: Attachment): String
 
-    =
+    // Get trigger from an attachment
+    protected def triggerOf(attachment: Attachment): String =
     {
       attachment match {
         case inc: Increase => inc.trigger
@@ -625,298 +539,14 @@ class EidosActions(val taxonomy: Taxonomy, val expansionHandler: ExpansionHandle
         case _ => throw new UnsupportedClassVersionError()
       }
     }
-
-//<<<<<<< HEAD
-//    /*
-//      Entity Expansion Methods
-//   */
-//
-//    def pass(mentions: Seq[Mention], state: State): Seq[Mention] = mentions
-//
-//    def getNewTokenInterval(intervals: Seq[Interval]): Interval = Interval(intervals.minBy(_.start).start, intervals.maxBy(_.end).end)
-//
-//    def copyWithNewArgs(orig: Mention, expandedArgs: Map[String, Seq[Mention]], foundByAffix: Option[String] = None, mkNewInterval: Boolean = true): Mention = {
-//      var newTokenInterval = orig.tokenInterval
-//      if (mkNewInterval) {
-//        // All involved token intervals, both for the original event and the expanded arguments
-//        val allIntervals = Seq(orig.tokenInterval) ++ expandedArgs.values.flatten.map(arg => arg.tokenInterval)
-//        // Find the largest span from these intervals
-//        newTokenInterval = getNewTokenInterval(allIntervals)
-//      }
-//
-//      val paths = for {
-//        (argName, argPathsMap) <- orig.paths
-//        origPath = argPathsMap(orig.arguments(argName).head)
-//      } yield (argName, Map(expandedArgs(argName).head -> origPath))
-//
-//      // Make the copy based on the type of the Mention
-//      val copyFoundBy = if (foundByAffix.nonEmpty) s"${orig.foundBy}_$foundByAffix" else orig.foundBy
-//
-//      orig match {
-//        case tb: TextBoundMention => throw new RuntimeException("Textbound mentions are incompatible with argument expansion")
-//        case rm: RelationMention => rm.copy(arguments = expandedArgs, tokenInterval = newTokenInterval, foundBy = copyFoundBy)
-//        case em: EventMention => em.copy(arguments = expandedArgs, tokenInterval = newTokenInterval, foundBy = copyFoundBy, paths = paths)
-//      }
-//    }
-//
-//
-//    // New action designed to expand the args of relevant events only...
-//    def expandArguments(mentions: Seq[Mention], state: State): Seq[Mention] = {
-//      // Yields not only the mention with newly expanded arguments, but also yields the expanded argument mentions
-//      // themselves so that they can be added to the state (which happens when the Seq[Mentions] is returned at the
-//      // end of the action
-//      val expansionResult = for {
-//        mention <- mentions
-//        trigger = mention match {
-//          case rm: RelationMention => None
-//          case em: EventMention => Some(em.trigger)
-//          case _ => throw new RuntimeException("Trying to get the trigger from a mention with no trigger")
-//        }
-//        stateToAvoid = if (trigger.nonEmpty) State(Seq(trigger.get)) else new State()
-//
-//        // Get the argument map with the *expanded* Arguments
-//        expanded = for {
-//          (argType, argMentions) <- mention.arguments
-//          expandedMentions = argMentions.map(expandIfNotAvoid(_, maxHops = EidosActions.MAX_HOPS_EXPANDING, stateToAvoid))
-//          attached = expandedMentions.map(addSubsumedAttachments(_, state))
-//          dctattached = attached.map(attachDCT(_, state))
-//          propAttached = addOverlappingAttachmentsTextBounds(dctattached, state)
-//          trimmed = propAttached.map(EntityHelper.trimEntityEdges)
-//        } yield (argType, trimmed)
-//
-//      } yield Seq(copyWithNewArgs(mention, expanded.toMap)) ++ expanded.toSeq.unzip._2.flatten
-//
-//      // Get all the new mentions for the state -- both the events with new args and the
-//      val res = expansionResult.flatten
-//
-//      val mc = keepMostCompleteEvents(res, state.updated(res))
-//
-//      // Useful for debug
-//      mc
-//    }
-//
-//    def addOverlappingAttachmentsTextBounds(ms: Seq[Mention], state: State): Seq[Mention] = {
-//      for {
-//        m <- ms
-//      } yield m match {
-//        case tb: TextBoundMention =>
-//          val attachments = getOverlappingAttachments(tb, state)
-//          if (attachments.nonEmpty) tb.copy(attachments = tb.attachments ++ attachments) else tb
-//        case _ => m
-//      }
-//    }
-//
-//    def getOverlappingAttachments(m: Mention, state: State): Set[Attachment] = {
-//      val interval = m.tokenInterval
-//      // Properties
-//      val overlappingProps = state.mentionsFor(m.sentence, interval, label = "Property")
-//      val propAttachments = overlappingProps.map(pm => Property(pm.text, None)).toSet
-//      // Locations
-//      val overlappingLocs = state.mentionsFor(m.sentence, interval, label = "Location")
-//      val locAttachments = overlappingLocs.map(lm => LocationTM(lm.text, None)).toSet
-//      // Organizations
-//      val overlappingOrgs = state.mentionsFor(m.sentence, interval, label = "Organization")
-//      val orgAttachments = overlappingOrgs.map(om => Organization(om.text, None)).toSet
-//      // todo? Violence?
-//
-//      propAttachments ++ locAttachments ++ orgAttachments
-//    }
-//
-//
-//    private def replaceMentionsInterval(m: Mention, i: Interval): Mention
-//
-//    = m match {
-//      case m: TextBoundMention => m.copy(tokenInterval = i)
-//      case _ => sys.error("M is not a textboundmention, I don't know what to do")
-//    }
-//
-//    // Do the expansion, but if the expansion causes you to suck up something we wanted to avoid, split at the
-//    // avoided thing and keep the half containing the origina (pre-expansion) entity.
-//    def expandIfNotAvoid(orig: Mention, maxHops: Int, stateToAvoid: State): Mention = {
-//      val expanded = expand(orig, maxHops = EidosActions.MAX_HOPS_EXPANDING, stateToAvoid)
-//      //println(s"orig: ${orig.text}\texpanded: ${expanded.text}")
-//
-//      // split expanded at trigger (only thing in state to avoid)
-//      val triggerOption = stateToAvoid.mentionsFor(orig.sentence).headOption
-//      triggerOption match {
-//        case None => expanded
-//        case Some(trigger) =>
-//          // keep the half that is on the same side as original Mention
-//          if (trigger.tokenInterval overlaps expanded.tokenInterval) {
-//            if (orig.tokenInterval.end <= trigger.tokenInterval.start) {
-//              // orig is to the left of trigger
-//              replaceMentionsInterval(expanded, Interval(expanded.start, trigger.start))
-//            } else if (orig.tokenInterval.start >= trigger.tokenInterval.end) {
-//              // orig is to the right of trigger
-//              replaceMentionsInterval(expanded, Interval(trigger.end, expanded.end))
-//            } else {
-//              //throw new RuntimeException("original mention overlaps trigger")
-//              // This shouldn't happen, but Odin seems to handle this situation gracefully (by not extracting anything),
-//              // I guess here we'll do the same (i.e., not throw an exception)
-//              logger.debug(s"Unexpected overlap of trigger and argument: \n\t" +
-//                s"sent: [${orig.sentenceObj.getSentenceText}]\n\tRULE: " +
-//                s"${trigger.foundBy}\n\ttrigger: ${trigger.text}\torig: [${orig.text}]\n")
-//              orig
-//            }
-//          } else {
-//            expanded
-//          }
-//      }
-//
-//    }
-//
-//
-//    //-- Entity expansion methods (brought in from EntityFinder)
-//    def expand(entity: Mention, maxHops: Int, stateFromAvoid: State): Mention = {
-//      // Expand the incoming to recapture any triggers which were avoided
-//      val interval1 = traverseIncomingLocal(entity, maxHops, stateFromAvoid, entity.sentenceObj)
-//      val incomingExpanded = entity.asInstanceOf[TextBoundMention].copy(tokenInterval = interval1)
-//      // Expand on outgoing deps
-//      val interval2 = traverseOutgoingLocal(incomingExpanded, maxHops, stateFromAvoid, entity.sentenceObj)
-//      val outgoingExpanded = incomingExpanded.asInstanceOf[TextBoundMention].copy(tokenInterval = interval2)
-//
-//      outgoingExpanded
-//    }
-//
-//
-//    /** Used by expand to selectively traverse the provided syntactic dependency graph **/
-//    @tailrec
-//    private def traverseOutgoingLocal(
-//                                       tokens: Set[Int],
-//                                       newTokens: Set[Int],
-//                                       outgoingRelations: Array[Array[(Int, String)]],
-//                                       incomingRelations: Array[Array[(Int, String)]],
-//                                       remainingHops: Int,
-//                                       sent: Int,
-//                                       state: State,
-//                                       sentence: Sentence
-//
-//                                     ): Interval
-//
-//    =
-//    {
-//      if (remainingHops == 0) {
-//        val allTokens = tokens ++ newTokens
-//        Interval(allTokens.min, allTokens.max + 1)
-//      } else {
-//        val newNewTokens = for {
-//          tok <- newTokens
-//          if outgoingRelations.nonEmpty && tok < outgoingRelations.length
-//          (nextTok, dep) <- outgoingRelations(tok)
-//          if isValidOutgoingDependency(dep, sentence.words(nextTok), remainingHops)
-//          if state.mentionsFor(sent, nextTok).isEmpty
-//          if hasValidIncomingDependencies(nextTok, incomingRelations)
-//        } yield nextTok
-//        traverseOutgoingLocal(tokens ++ newTokens, newNewTokens, outgoingRelations, incomingRelations, remainingHops - 1, sent, state, sentence)
-//      }
-//    }
-//
-//    private def traverseOutgoingLocal(m: Mention, numHops: Int, stateFromAvoid: State, sentence: Sentence): Interval
-//
-//    =
-//    {
-//      val outgoing = outgoingEdges(m.sentenceObj)
-//      val incoming = incomingEdges(m.sentenceObj)
-//      traverseOutgoingLocal(Set.empty, m.tokenInterval.toSet, outgoingRelations = outgoing, incomingRelations = incoming, numHops, m.sentence, stateFromAvoid, sentence)
-//    }
-//
-//    /** Used by expand to selectively traverse the provided syntactic dependency graph **/
-//    @tailrec
-//    private def traverseIncomingLocal(
-//                                       tokens: Set[Int],
-//                                       newTokens: Set[Int],
-//                                       incomingRelations: Array[Array[(Int, String)]],
-//                                       remainingHops: Int,
-//                                       sent: Int,
-//                                       state: State,
-//                                       sentence: Sentence
-//
-//                                     ): Interval
-//
-//    =
-//    {
-//      if (remainingHops == 0) {
-//        val allTokens = tokens ++ newTokens
-//        Interval(allTokens.min, allTokens.max + 1)
-//      } else {
-//        val newNewTokens = for {
-//          tok <- newTokens
-//          if incomingRelations.nonEmpty && tok < incomingRelations.length
-//          (nextTok, dep) <- incomingRelations(tok)
-//          if isValidIncomingDependency(dep)
-//          if state.mentionsFor(sent, nextTok).isEmpty
-//        } yield nextTok
-//        traverseIncomingLocal(tokens ++ newTokens, newNewTokens, incomingRelations, remainingHops - 1, sent, state, sentence)
-//      }
-//    }
-//
-//    private def traverseIncomingLocal(m: Mention, numHops: Int, stateFromAvoid: State, sentence: Sentence): Interval
-//
-//    =
-//    {
-//      val incoming = incomingEdges(m.sentenceObj)
-//      traverseIncomingLocal(Set.empty, m.tokenInterval.toSet, incomingRelations = incoming, numHops, m.sentence, stateFromAvoid, sentence)
-//    }
-//
-//
-//    def outgoingEdges(s: Sentence): Array[Array[(Int, String)]] = s.dependencies match {
-//      case None => sys.error("sentence has no dependencies")
-//      case Some(dependencies) => dependencies.outgoingEdges
-//    }
-//
-//    def incomingEdges(s: Sentence): Array[Array[(Int, String)]] = s.dependencies match {
-//      case None => sys.error("sentence has no dependencies")
-//      case Some(dependencies) => dependencies.incomingEdges
-//    }
-//
-//    /** Ensure dependency may be safely traversed */
-//    def isValidOutgoingDependency(dep: String, token: String, remainingHops: Int): Boolean = {
-//      (
-//        VALID_OUTGOING.exists(pattern => pattern.findFirstIn(dep).nonEmpty) &&
-//          !INVALID_OUTGOING.exists(pattern => pattern.findFirstIn(dep).nonEmpty)
-//        ) || (
-//        // Allow exception to close parens, etc.
-//        dep == "punct" && Seq(")", "]", "}", "-RRB-").contains(token)
-//        )
-//    }
-//
-//    /** Ensure incoming dependency may be safely traversed */
-//    def isValidIncomingDependency(dep: String): Boolean = {
-//      VALID_INCOMING.exists(pattern => pattern.findFirstIn(dep).nonEmpty)
-//    }
-//
-//    def notInvalidConjunction(dep: String, hopsRemaining: Int): Boolean = {
-//      // If it's not a coordination/conjunction, don't worry
-//      if (EntityConstraints.COORD_DEPS.exists(pattern => pattern.findFirstIn(dep).isEmpty)) {
-//        return true
-//      } else if (hopsRemaining < EidosActions.MAX_HOPS_EXPANDING) {
-//        // if it has a coordination/conjunction, check to make sure not at the top level (i.e. we've traversed
-//        // something already
-//        return true
-//      }
-//=======
-//>>>>>>> upstream/master
-//
-//      false
-//    }
-//
-//    /** Ensure current token does not have any incoming dependencies that are invalid **/
-//    def hasValidIncomingDependencies(tokenIdx: Int, incomingDependencies: Array[Array[(Int, String)]]): Boolean = {
-//      if (incomingDependencies.nonEmpty && tokenIdx < incomingDependencies.length) {
-//        incomingDependencies(tokenIdx).forall(pair => !INVALID_INCOMING.exists(pattern => pattern.findFirstIn(pair._2).nonEmpty))
-//      } else true
-//    }
-
 }
 
 object EidosActions extends Actions {
-
   // Used for simplistic coreference identification
   val COREF_DETERMINERS: Set[String] = Set("this", "that", "these", "those")
   val ANTECEDENT: String = "antecedent"
   val ANAPHOR: String = "anaphor"
 
-  
   def apply(taxonomyPath: String, expansionHandler: ExpansionHandler) =
       new EidosActions(readTaxonomy(taxonomyPath), expansionHandler)
 

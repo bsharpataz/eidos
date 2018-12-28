@@ -146,11 +146,13 @@ class HomeController @Inject()(cc: ControllerComponents) extends AbstractControl
   
   def groundEntity(mention: Mention, quantifier: String, ieSystem: EidosSystem): GroundedEntity = {
     // add the calculation
-    println("loaded domain params:" + ieSystem.domainParams.toString())
-    println(s"\tkeys: ${ieSystem.domainParams.keys.mkString(", ")}")
+    val domainParams = ieSystem.loadableAttributes.domainParams
+
+    println("loaded domain params:" + domainParams.toString())
+    println(s"\tkeys: ${domainParams.keys.mkString(", ")}")
     println(s"getting details for: ${mention.text}")
 
-    val paramDetails = ieSystem.domainParams.get(DomainParams.DEFAULT_DOMAIN_PARAM).get
+    val paramDetails = domainParams.get(DomainParams.DEFAULT_DOMAIN_PARAM).get
     val paramMean = paramDetails.get(DomainParams.PARAM_MEAN).get
     val paramStdev = paramDetails.get(DomainParams.PARAM_STDEV).get
     val grounding = ieSystem.groundAdjective(quantifier)
@@ -503,16 +505,16 @@ class HomeController @Inject()(cc: ControllerComponents) extends AbstractControl
   def mkJsonFromLocationExpressions(location: Option[Array[Seq[GeoPhraseID]]]): Json.JsValueWrapper = {
     val result = location.map { location =>
       var x = 0
-      val timexs = for (t <- location; i <- t) yield {
+      val geoexps = for (t <- location; i <- t) yield {
         x += 1
         Json.arr(
-          s"X$x",
-          "x",
+          s"G$x",
+          "GeoLocation",
           Json.arr(Json.arr(i.startOffset, i.endOffset)),
           Json.toJson(i.geonameID)
         )
       }
-      Json.toJson(timexs)
+      Json.toJson(geoexps)
     }.getOrElse(Json.toJson(Json.arr()))
     result
   }
