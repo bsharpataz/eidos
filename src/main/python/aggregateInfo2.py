@@ -5,7 +5,7 @@ import glob
 import re
 import string
 
-Extraction = namedtuple('Extraction', 'file_prefix article_index sentence_id aid eid news_id title date event_type hedge_neg actor actor_number actor_location theme them_actor sentence_text rule')
+Extraction = namedtuple('Extraction', 'file_prefix article_index sentence_id aid eid news_id title date event_type hedge_neg actor actor_number actor_location theme them_actor theme_grounding theme_location sentence_locations all_locations sentence_text rule')
 Master = namedtuple("Master", 'RA news_id published_date title aid eid countryname')
 
 
@@ -63,9 +63,9 @@ def read_extraction_file(fn, master_aid_dict, aid_index):
                 line = line.strip()
                 if not line.startswith("file"):
                     #print(line)
-                    _, sentence_id, _, _, _, _, _, event_type, hedge_neg, actor, actor_number, actor_location, theme, theme_actor, sentence_text, rule_name = line.split("\t")
+                    _, sentence_id, _, _, _, _, _, event_type, hedge_neg, actor, actor_number, actor_location, theme, theme_actor, theme_grounding, theme_location, sentence_locations, all_locations, sentence_text, rule_name = line.split("\t")
 
-                    extracted_info = Extraction(file_prefix, file_index, sentence_id, m.aid, m.eid, m.news_id, m.title, m.published_date, event_type, hedge_neg, actor, actor_number, actor_location, theme, theme_actor, sentence_text, rule_name)
+                    extracted_info = Extraction(file_prefix, file_index, sentence_id, m.aid, m.eid, m.news_id, m.title, m.published_date, event_type, hedge_neg, actor, actor_number, actor_location, theme, theme_actor, theme_grounding, theme_location, sentence_locations, all_locations, sentence_text, rule_name)
                     # extracted_info.title = title
                     # extracted_info.date = date
                     #print(extracted_info)
@@ -80,7 +80,7 @@ def read_extraction_file(fn, master_aid_dict, aid_index):
 
 def export_extractions(extractions, fn):
     with open(fn, 'w') as csv_file:
-        header = 'file_prefix article_index sentence_id aid eid news_id title date event_type hedge_neg actor actor_number actor_location theme theme_actor sentence_text rule_name'.split(" ")
+        header = 'file_prefix article_index sentence_id aid eid news_id title date event_type hedge_neg actor actor_number actor_location theme theme_actor theme_grounding theme_location sentence_locations all_locations sentence_text rule_name'.split(" ")
         csv_writer = csv.writer(csv_file, delimiter='\t')
         csv_writer.writerow(header)
         for e in extractions:
@@ -134,7 +134,8 @@ def main():
     # get the list of extraction files
     # extraction_dir = f"/Users/bsharp/data/protests/all_files/extractions"
     # extraction_dir = f"/Users/bsharp/data/protests/with_per/extractions"
-    extraction_dir = f"/Users/bsharp/data/protests/oct13/extractions"
+    # extraction_dir = f"/Users/bsharp/data/protests/oct13/extractions"
+    extraction_dir = f"/Users/bsharp/data/protests/dev_out"
     filelist = get_files(extraction_dir, "tsv")
     for f in filelist:
         num_files += 1
@@ -149,7 +150,8 @@ def main():
     # print(f"There were a total of {backoff_ctr} files that were found with the backoff.")
     print(f"There were a total of {backoff_ctr} files that were unused bc of empty titles.")
     print(f"There were a total of {num_files} files.")
-    outputfile = "/Users/bsharp/data/protests/extractions_all_oct13.tsv"
+    # outputfile = "/Users/bsharp/data/protests/extractions_all_oct13.tsv"
+    outputfile = "/Users/bsharp/data/protests/extractions_dev.tsv"
     export_extractions(extractions, outputfile)
     #
 
