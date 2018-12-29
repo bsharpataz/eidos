@@ -21,6 +21,7 @@ import org.clulab.wm.eidos.actions.ExpansionHandler
 import org.clulab.wm.eidos.context.GeoDisambiguateParser
 
 import scala.annotation.tailrec
+import scala.collection.mutable.ArrayBuffer
 
 case class AnnotatedDocument(document: Document, odinMentions: Seq[Mention], eidosMentions: Seq[EidosMention])
 
@@ -323,6 +324,11 @@ class EidosSystem(val config: Config = ConfigFactory.load("eidos")) extends Stop
     val allMentions = State(mentions)
     val cagEdgeMentions = mentions.filter(m => releventEdge(m, allMentions))
 
+    // TODO Not doing what I want -- I want to prune out the things with no content, not remove the whole event...
+    // maybe prune in the exporting???
+
+
+
     // Should these be included as well?
 
     // 3) These last ones may overlap with the above or include mentions not in the original list.
@@ -330,7 +336,12 @@ class EidosSystem(val config: Config = ConfigFactory.load("eidos")) extends Stop
     // Put them all together.
     // val releventEdgesAndTheirArgs = cagEdgeMentions ++ cagEdgeArguments
     // To preserve order, avoid repeats, and not allow anything new in the list, filter the original.
-    mentions.filter(mention => isCAGRelevant(mention, cagEdgeMentions, cagEdgeArguments))
+
+    val filtered = mentions.filter(mention => isCAGRelevant(mention, cagEdgeMentions, cagEdgeArguments))
+    // prune contentless args
+    val pruned = filtered.map(pruneContentlessArgs(_))
+
+    pruned
   }
 
   def isCAGRelevant(mention: Mention, cagEdgeMentions: Seq[Mention], cagEdgeArguments: Seq[Mention]): Boolean =
@@ -349,15 +360,27 @@ class EidosSystem(val config: Config = ConfigFactory.load("eidos")) extends Stop
     }
   }
 
-  def argumentsHaveContent(mention: EventMention, state: State): Boolean = {
-    val causes: Seq[Mention] = mention.arguments.getOrElse("cause", Seq.empty)
-    val effects: Seq[Mention] = mention.arguments.getOrElse("effect", Seq.empty)
+  def mentionHasContent(m: Mention): Boolean = loadableAttributes.stopwordManager.hasContent(m)
 
-    if (causes.nonEmpty && effects.nonEmpty) // If it's something interesting,
-    // then both causes and effects should have some content
-      causes.exists(loadableAttributes.stopwordManager.hasContent(_, state)) && effects.exists(loadableAttributes.stopwordManager.hasContent(_, state))
-    else
-      true
+  def argumentsHaveContent(mention: EventMention, state: State): Boolean = {
+    // Check to see if args have content
+    val contentStatus = mention.arguments.map(arg => arg._2.exists(mention => mentionHasContent(mention)))
+    contentStatus.toSet.contains(true)
+  }
+
+  def pruneContentlessArgs(m: Mention): Mention = {
+    m match {
+      case tb: TextBoundMention => m
+      case _ =>
+        val newArgs = scala.collection.mutable.HashMap[String, Seq[Mention]]()
+        for ((argType, argMentions) <- m.arguments) {
+          val contentful = argMentions.filter(m => mentionHasContent(m))
+          if (contentful.nonEmpty) {
+            newArgs.put(argType, contentful)
+          }
+        }
+        ExpansionHandler.copyWithNewArgs(m, newArgs.toMap, foundByAffix = Some("ContentPruned"))
+    }
   }
 
   /**
@@ -402,6 +425,9 @@ object EidosSystem {
   val COREF_LABEL = "Coreference"
   val PROTEST_LABEL = "Protest"
   val DEMAND_LABEL = "Demand"
+  val VIOLENCE1_LABEL = "Violence1"
+  val VIOLENCE2_LABEL = "Violence2"
+  val VIOLENCE3_LABEL = "Violence3"
   // Taxonomy relations for other uses
   val RELATION_LABEL = "EntityLinker"
 
@@ -414,5 +440,6 @@ object EidosSystem {
   val SAME_AS_METHOD = "simple-w2v"
 
   // CAG filtering
-  val CAG_EDGES: Set[String] = Set(CAUSAL_LABEL, CORR_LABEL, COREF_LABEL, DEMAND_LABEL, PROTEST_LABEL)
+  val EXPANDABLE: Set[String] = Set(CAUSAL_LABEL, CORR_LABEL, COREF_LABEL, DEMAND_LABEL, PROTEST_LABEL)
+  val CAG_EDGES: Set[String] = Set(CAUSAL_LABEL, CORR_LABEL, COREF_LABEL, DEMAND_LABEL, PROTEST_LABEL, VIOLENCE1_LABEL, VIOLENCE2_LABEL, VIOLENCE3_LABEL)
 }
