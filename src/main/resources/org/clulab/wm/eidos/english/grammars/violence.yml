@@ -1,8 +1,0 @@
-
-rules:
-    - name: ${label}-1
-      label: ${label}
-      priority: ${rulepriority}
-      type: token
-      pattern: |
-        [word=/(?i)^${trigger}/]
