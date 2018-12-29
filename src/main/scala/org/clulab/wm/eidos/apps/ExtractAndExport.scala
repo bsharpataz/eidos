@@ -90,11 +90,12 @@ case class MitreExporter(pw: PrintWriter, reader: EidosSystem, filename: String,
   override def close(): Unit = Option(pw).map(_.close())
 
   def header(): String = {
-    "file\tsentence_id\taid\teid\tnews_id\ttitle\tdate\tevent_type\thedge_neg\tactor\tactor_number\tactor_location\ttheme\ttheme_actor\ttheme grounding\tsentence_text\trule_name"
+    "file\tsentence_id\taid\teid\tnews_id\ttitle\tdate\tevent_type\thedge_neg\tactor\tactor_number\tactor_location\ttheme\ttheme_actor\ttheme grounding\ttheme_location\tsentence_location\tall_locations\tsentence_text\trule_name"
   }
 
 
   def printTableRows(annotatedDocument: AnnotatedDocument, pw: PrintWriter, filename: String, reader: EidosSystem): Unit = {
+    val doc = annotatedDocument.document
     val allOdinMentions = annotatedDocument.eidosMentions.map(_.odinMention)
     val mentionsToPrint = annotatedDocument.eidosMentions.filter(m => reader.releventEdge(m.odinMention, State(allOdinMentions)))
 
@@ -118,19 +119,33 @@ case class MitreExporter(pw: PrintWriter, reader: EidosSystem, filename: String,
       val theme = headTextOrElse(themes, "")
       val themeActor = themeActorOrElse(themes, "")
       val themeGrounded = themeGroundingOrElse(mention.eidosArguments.get("theme"), "")
+      val themeLocation = locationOrElse(themes, default = "")
 
       val trigger_txt = triggerTextOrElse(odinMention, "")
       val relation_norm = mention.label // i.e., "Protest" or "Demand"
 
       val hedgedNegatedStatus = hedgedOrNegated(odinMention)
 
+      val currSentence = doc.sentences(odinMention.sentence)
+      val locationsThisSentence = for {
+        i <- currSentence.indices
+        if currSentence.entities.get(i) == "LOCATION"
+      } yield currSentence.words(i)
+      val sentenceLocations = locationsThisSentence.toSet.mkString(", ")
+
+      val locationsAllSentences = for {
+        sent <- doc.sentences
+        i <- sent.indices
+        if sent.entities.get(i) == "LOCATION"
+      } yield sent.words(i)
+      val allLocations = locationsAllSentences.toSet.mkString(", ")
 //      val locations = locationOrElse(odinMention, "")
 
       val foundBy = odinMention.foundBy
 
       val evidence = mention.odinMention.sentenceObj.getSentenceText.normalizeSpace
 
-      val info = Seq(filename, sentence_id, aid, eid, newsid, title, date, relation_norm, hedgedNegatedStatus, actor, actorNumber, actorLocation, theme, themeActor, themeGrounded, evidence, foundBy)
+      val info = Seq(filename, sentence_id, aid, eid, newsid, title, date, relation_norm, hedgedNegatedStatus, actor, actorNumber, actorLocation, theme, themeActor, themeGrounded, themeLocation, sentenceLocations, allLocations, evidence, foundBy)
 
       val row = info.mkString("\t") + "\n"
       pw.print(row)
@@ -169,7 +184,7 @@ case class MitreExporter(pw: PrintWriter, reader: EidosSystem, filename: String,
   }
   def locationOrElse(m: Mention, default: String): String = {
     val ms = m +: m.arguments.values.flatten.toSeq.distinct
-    val locations = ms.flatMap(m => m.attachments.filter(_.isInstanceOf[Location]))
+    val locations = ms.flatMap(m => m.attachments.filter(a => a.isInstanceOf[LocationTM] || a.isInstanceOf[Location]))
     if (locations.nonEmpty) locations.mkString(", ") else default
   }
 
