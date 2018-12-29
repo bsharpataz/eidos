@@ -7,24 +7,4 @@ rules:
       pattern: |
         [word=/(?i)^${trigger}/]
 
-    - name: set-fire-1
-      label: Violence2
-      priority: ${rulepriority}
-      type: token
-      pattern: |
-        set fire to
-        |
-        set []{,4} on fire
-        |
-        started []{,2} /^fire/
 
-    - name: shooting-1
-      label: Violence3
-      priority: ${rulepriority}
-      type: token
-      pattern: |
-        opened fire
-        |
-        fired into
-        |
-        shots fired

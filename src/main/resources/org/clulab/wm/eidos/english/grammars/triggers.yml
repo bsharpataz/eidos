@@ -16,10 +16,10 @@ nonavoid_affect_triggers: "impact"
 correlation_triggers: "coincid|link"
 
 protest_triggers: "chant|condemn|congregat|denounc|manifestation|march|picket|protest|rally|ralli|resent|sit-in|slogan|stand"
-demand_triggers: "appeal|assert|demand|insist|request|requir|shout|stand"
+demand_triggers: "appeal|assert|demand|insist|request|requir|shout"
 #call for
 #demand_triggers_strict: ""
 
 violence_1_triggers: "arrest|detain|sit-in"
-violence_2_triggers: "hit|kick|punch|throw"
+violence_2_triggers: "hit|kick|lobbed|punch|throw|violen"
 violence_3_triggers: "bomb|bullet|fired|gun|kill|shoot|shot"

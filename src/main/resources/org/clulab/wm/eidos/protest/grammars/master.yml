@@ -19,21 +19,21 @@ rules:
       rulepriority: "1"
 
   #Step 1: find the direct attachments of entities (e.g. "small puppies")
-  - import: org/clulab/wm/eidos/english/grammars/violence.yml
+  - import: org/clulab/wm/eidos/english/grammars/violenceTemplate.yml
     vars:
       rulepriority: "1"
       action: pass
       label: Violence1
       trigger: ${ violence_1_triggers }
 
-  - import: org/clulab/wm/eidos/english/grammars/violence.yml
+  - import: org/clulab/wm/eidos/english/grammars/violenceTemplate.yml
     vars:
       rulepriority: "1"
       action: pass
       label: Violence2
       trigger: ${ violence_2_triggers }
 
-  - import: org/clulab/wm/eidos/english/grammars/violence.yml
+  - import: org/clulab/wm/eidos/english/grammars/violenceTemplate.yml
     vars:
       rulepriority: "1"
       action: pass
