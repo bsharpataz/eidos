@@ -52,8 +52,8 @@ object CacheOntologies extends App with Configured {
   val config2 = ConfigFactory.load("eidos")
     .withValue("EidosSystem.useW2V", ConfigValueFactory.fromAnyRef(true, "DO use vectors when mapping ontologies."))
   override def getConf: Config = config2
-  val reader2 = new EidosSystem(config2)
-  val outputFile = getArgString("apps.ontologymapper.outfile", None)
-  val topN = getArgInt("apps.groundTopN", Some(5))
-  OntologyMapper.mapIndicators(reader2, outputFile, topN)
+//  val reader2 = new EidosSystem(config2)
+//  val outputFile = getArgString("apps.ontologymapper.outfile", None)
+//  val topN = getArgInt("apps.groundTopN", Some(5))
+//  OntologyMapper.mapIndicators(reader2, outputFile, topN)
 }
