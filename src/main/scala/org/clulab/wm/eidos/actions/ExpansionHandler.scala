@@ -80,7 +80,7 @@ class ExpansionHandler(val language: String) extends LazyLogging {
       newArgs.put(argType, attached)
     }
     // Return the event with the expanded args as well as the arg mentions themselves
-    Seq(copyWithNewArgs(m, newArgs.toMap)) ++ newArgs.values.toSeq.flatten
+    Seq(ExpansionHandler.copyWithNewArgs(m, newArgs.toMap)) ++ newArgs.values.toSeq.flatten
   }
 
 
@@ -254,34 +254,6 @@ class ExpansionHandler(val language: String) extends LazyLogging {
     } else true
   }
 
-  // Return a copy of the orig EventMention, but with the expanded arguments
-  // The changes made to the mention are the args, the token interval, foundby, and the paths.
-  def copyWithNewArgs(orig: Mention, expandedArgs: Map[String, Seq[Mention]], foundByAffix: Option[String] = None, mkNewInterval: Boolean = true): Mention = {
-    // Helper method to get a token interval for the new event mention with expanded args
-    def getNewTokenInterval(intervals: Seq[Interval]): Interval = Interval(intervals.minBy(_.start).start, intervals.maxBy(_.end).end)
-
-    val newTokenInterval = if (mkNewInterval) {
-      // All involved token intervals, both for the original event and the expanded arguments
-      val allIntervals = Seq(orig.tokenInterval) ++ expandedArgs.values.flatten.map(arg => arg.tokenInterval)
-      // Find the largest span from these intervals
-      getNewTokenInterval(allIntervals)
-    }
-    else orig.tokenInterval
-
-    val paths = for {
-      (argName, argPathsMap) <- orig.paths
-      origPath = argPathsMap(orig.arguments(argName).head)
-    } yield (argName, Map(expandedArgs(argName).head -> origPath))
-
-    // Make the copy based on the type of the Mention
-    val copyFoundBy = if (foundByAffix.nonEmpty) s"${orig.foundBy}_$foundByAffix" else orig.foundBy
-
-    orig match {
-      case tb: TextBoundMention => throw new RuntimeException("Textbound mentions are incompatible with argument expansion")
-      case rm: RelationMention => rm.copy(arguments = expandedArgs, tokenInterval = newTokenInterval, foundBy = copyFoundBy)
-      case em: EventMention => em.copy(arguments = expandedArgs, tokenInterval = newTokenInterval, foundBy = copyFoundBy, paths = paths)
-    }
-  }
 
 
   /*
@@ -417,4 +389,35 @@ object ExpansionHandler {
   )
 
   def apply(language: String) = new ExpansionHandler(language)
+
+  // Return a copy of the orig EventMention, but with the expanded arguments
+  // The changes made to the mention are the args, the token interval, foundby, and the paths.
+  def copyWithNewArgs(orig: Mention, expandedArgs: Map[String, Seq[Mention]], foundByAffix: Option[String] = None, mkNewInterval: Boolean = true): Mention = {
+    // Helper method to get a token interval for the new event mention with expanded args
+    def getNewTokenInterval(intervals: Seq[Interval]): Interval = Interval(intervals.minBy(_.start).start, intervals.maxBy(_.end).end)
+
+    val newTokenInterval = if (mkNewInterval) {
+      // All involved token intervals, both for the original event and the expanded arguments
+      val allIntervals = Seq(orig.tokenInterval) ++ expandedArgs.values.flatten.map(arg => arg.tokenInterval)
+      // Find the largest span from these intervals
+      getNewTokenInterval(allIntervals)
+    }
+    else orig.tokenInterval
+
+    val paths = for {
+      (argName, _) <- expandedArgs
+      argPathsMap = orig.paths(argName)
+      origPath = argPathsMap(orig.arguments(argName).head)
+    } yield (argName, Map(expandedArgs(argName).head -> origPath))
+
+    // Make the copy based on the type of the Mention
+    val copyFoundBy = if (foundByAffix.nonEmpty) s"${orig.foundBy}_$foundByAffix" else orig.foundBy
+
+    orig match {
+      case tb: TextBoundMention => throw new RuntimeException("Textbound mentions are incompatible with argument expansion")
+      case rm: RelationMention => rm.copy(arguments = expandedArgs, tokenInterval = newTokenInterval, foundBy = copyFoundBy)
+      case em: EventMention => em.copy(arguments = expandedArgs, tokenInterval = newTokenInterval, foundBy = copyFoundBy, paths = paths.toMap)
+    }
+  }
+
 }
