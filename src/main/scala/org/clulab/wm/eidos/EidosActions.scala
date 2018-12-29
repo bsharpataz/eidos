@@ -34,7 +34,7 @@ class EidosActions(val taxonomy: Taxonomy, val expansionHandler: ExpansionHandle
   */
   def globalAction(mentions: Seq[Mention], state: State): Seq[Mention] = {
     // expand arguments
-    val (expandable, textBounds) = mentions.partition(m => EidosSystem.CAG_EDGES.contains(m.label))
+    val (expandable, textBounds) = mentions.partition(m => EidosSystem.EXPANDABLE.contains(m.label))
     val expanded = expansionHandler.expandArguments(expandable, state)
     val mostComplete = keepMostCompleteEvents(expanded, state.updated(expanded))
     val result = mostComplete ++ textBounds
