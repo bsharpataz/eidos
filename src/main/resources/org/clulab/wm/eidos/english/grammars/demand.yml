@@ -32,15 +32,15 @@ rules:
       actor: Entity? = </${agents}/
       theme: Entity = >/(nmod_for|advcl_for)/
 
-  - name: ${ label }_nmod_on
-    priority: ${ rulepriority }
-    example: ""
-    label: ${ label }
-    action: ${ action }
-    pattern: |
-      trigger = [word=/(?i)^(${trigger}|${demonstration_terms})/]
-      actor: Entity? = </${agents}/
-      theme: Entity = >/(nmod_on)/
+#  - name: ${ label }_nmod_on
+#    priority: ${ rulepriority }
+#    example: ""
+#    label: ${ label }
+#    action: ${ action }
+#    pattern: |
+#      trigger = [word=/(?i)^(${trigger}|${demonstration_terms})/]
+#      actor: Entity? = </${agents}/
+#      theme: Entity = >/(nmod_on)/
 
   - name: demand-ccomp
     priority: ${ rulepriority }
