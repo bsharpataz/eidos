@@ -37,6 +37,7 @@ object KerasToDL4J {
 }
 
 class GeoDisambiguateParser(geoNormModelPath: String, word2IdxPath: String, loc2geonameIDPath: String) {
+  println(s"***Loading GeoParser with: ${geoNormModelPath}\t$word2IdxPath\t$loc2geonameIDPath")
   val network: ComputationGraph = (GeoDisambiguateParser.getClass.getResourceAsStream(geoNormModelPath)).autoClose { modelStream =>
     ModelSerializer.restoreComputationGraph(modelStream)
   }
