@@ -341,7 +341,14 @@ class EidosSystem(val config: Config = ConfigFactory.load("eidos")) extends Stop
     // prune contentless args
     val pruned = filtered.map(pruneContentlessArgs(_))
 
-    pruned
+    // Remove Violence events that occur in the theme of another event
+    val (violence, other) = pruned.partition(_.matches("Violence"))
+    println(s"violence events: ${violence.map(_.text).mkString(", ")}")
+    println(s"\tother events: ${other.map(_.text).mkString(", ")}")
+    val keptViolence = violence.filterNot(v => loadableAttributes.actions.occursInTheme(v, other))
+    val result = keptViolence ++ other
+
+    result
   }
 
   def isCAGRelevant(mention: Mention, cagEdgeMentions: Seq[Mention], cagEdgeArguments: Seq[Mention]): Boolean =
@@ -379,7 +386,7 @@ class EidosSystem(val config: Config = ConfigFactory.load("eidos")) extends Stop
             newArgs.put(argType, contentful)
           }
         }
-        ExpansionHandler.copyWithNewArgs(m, newArgs.toMap, foundByAffix = Some("ContentPruned"))
+        ExpansionHandler.copyWithNewArgs(m, newArgs.toMap)
     }
   }
 
