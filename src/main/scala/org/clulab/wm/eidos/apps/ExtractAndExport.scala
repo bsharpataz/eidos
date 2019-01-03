@@ -130,14 +130,14 @@ case class MitreExporter(pw: PrintWriter, reader: EidosSystem, filename: String,
       val locationsThisSentence = for {
         i <- currSentence.indices
         if currSentence.entities.get(i) == "LOCATION"
-      } yield currSentence.words(i)
+      } yield currSentence.words(i).toLowerCase
       val sentenceLocations = locationsThisSentence.toSet.mkString(", ")
 
       val locationsAllSentences = for {
         sent <- doc.sentences
         i <- sent.indices
         if sent.entities.get(i) == "LOCATION"
-      } yield sent.words(i)
+      } yield sent.words(i).toLowerCase
       val allLocations = locationsAllSentences.toSet.mkString(", ")
 //      val locations = locationOrElse(odinMention, "")
 
