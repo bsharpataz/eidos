@@ -42,8 +42,10 @@ consumption
 contrast
 country
 cow
+crowd
 curve
 datum
+demonstrator
 diagnosis
 difference
 effect
@@ -98,6 +100,7 @@ number
 observation
 occurrence
 odds
+organizer
 origin
 part
 pastoralist
@@ -118,6 +121,7 @@ progression
 project
 proliferation
 proposal
+protester
 range
 rat
 rate
