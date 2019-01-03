@@ -39,6 +39,8 @@ class EidosActions(val taxonomy: Taxonomy, val expansionHandler: ExpansionHandle
     val mostComplete = keepMostCompleteEvents(expanded, state.updated(expanded))
     val result = mostComplete ++ textBounds
 
+
+
     // Merge attachments
     val merged = mergeAttachments(result, state.updated(result))
 
@@ -160,6 +162,19 @@ class EidosActions(val taxonomy: Taxonomy, val expansionHandler: ExpansionHandle
   /*
       Filtering Methods
    */
+
+  def occursInTheme(m: Mention, others: Seq[Mention]): Boolean = {
+    val mInterval = m.tokenInterval
+    for (other <- others) {
+      val themes = other.arguments.getOrElse("theme", Seq.empty[Mention])
+      for (theme <- themes) {
+        if (theme.tokenInterval.overlaps(mInterval)) {
+          return true
+        }
+      }
+    }
+    false
+  }
 
   // This was essentially .head before, but that is dependent on order.
   protected def tieBreaker(mentions: Seq[Mention]): Mention = {
@@ -362,6 +377,21 @@ class EidosActions(val taxonomy: Taxonomy, val expansionHandler: ExpansionHandle
     res
   }
 
+  def filterAuthorities(ms: Seq[Mention], state: State): Seq[Mention] = {
+    for {
+      (_, mentions) <- ms.groupBy(m => (m.sentence, m.tokenInterval, m.label)).toSeq
+
+      _ = println(s"Checking ${mentions.head.text}")
+      as = mentions.flatMap(m => m.arguments.getOrElse("actor", Seq.empty[Mention]))
+      _ = println(as.map(_.text).mkString(", "))
+      _ = println("-->" + as.map(_.label).mkString(", "))
+      cond = as.exists(actor => actor matches("Authorities"))
+      if !cond
+    } yield mentions.head
+  }
+
+
+
   /*
       Method for assembling Event Chain Events from flat text, i.e., ("(A --> B)" --> C) ==> (A --> B), (B --> C)
   */
@@ -384,6 +414,23 @@ class EidosActions(val taxonomy: Taxonomy, val expansionHandler: ExpansionHandle
         }
     }
   }
+
+  /*
+  *
+  */
+
+  /////////////////////////////////////////////////
+  // Check the outgoing edges from the mention looking
+  // for a neg label
+  def removeNegated(mentions: Seq[Mention], state: State): Seq[Mention] = {
+    for {
+      m <- mentions
+      outgoing = m.sentenceObj.dependencies.get.outgoingEdges
+      sdlks = outgoing.lift(0)
+      if !m.tokenInterval.exists(tok => outgoing.lift(tok).getOrElse(Array((0,""))).exists(dep => dep._2 == "neg"))
+    } yield m
+  }
+
 
   /*
       Mention State / Attachment Methods

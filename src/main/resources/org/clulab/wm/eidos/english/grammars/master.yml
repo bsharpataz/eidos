@@ -18,30 +18,35 @@ rules:
     vars:
       rulepriority: "1"
 
+  - import: org/clulab/wm/eidos/english/grammars/authorities.yml
+    vars:
+      rulepriority: "1"
+      action: pass
+
 
   - import: org/clulab/wm/eidos/english/grammars/violence.yml
     vars:
       rulepriority: "1"
-      action: pass
+      action: removeNegated
 
   - import: org/clulab/wm/eidos/english/grammars/violenceTemplate.yml
     vars:
       rulepriority: "1"
-      action: pass
+      action: removeNegated
       label: Violence1
       trigger: ${ violence_1_triggers }
 
   - import: org/clulab/wm/eidos/english/grammars/violenceTemplate.yml
     vars:
       rulepriority: "1"
-      action: pass
+      action: removeNegated
       label: Violence2
       trigger: ${ violence_2_triggers }
 
   - import: org/clulab/wm/eidos/english/grammars/violenceTemplate.yml
     vars:
       rulepriority: "1"
-      action: pass
+      action: removeNegated
       label: Violence3
       trigger: ${ violence_3_triggers }
 
@@ -126,7 +131,7 @@ rules:
       rulepriority: "6"
       addlabel: "Protest"
       label: Protest
-      action: pass
+      action: filterAuthorities
       trigger: ${protest_triggers}
 
 
@@ -136,7 +141,7 @@ rules:
       rulepriority: "6"
       addlabel: "Demand"
       label: Demand
-      action: pass
+      action: filterAuthorities
       trigger: ${demand_triggers}
 
   # ------------ Causal ------------

@@ -4,6 +4,7 @@ rules:
       label: ${label}
       priority: ${rulepriority}
       type: token
+      action: ${action}
       pattern: |
         [word=/(?i)^${trigger}/]
 

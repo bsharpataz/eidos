@@ -3,7 +3,9 @@ rules:
     label: Violence2
     priority: ${rulepriority}
     type: token
+    action: ${action}
     pattern: |
+      # [word=/set/ & !outgoing=/neg/] fire to
       set fire to
       |
       set []{,4} on fire
@@ -14,6 +16,7 @@ rules:
     label: Violence3
     priority: ${rulepriority}
     type: token
+    action: ${action}
     pattern: |
       opened fire
       |
