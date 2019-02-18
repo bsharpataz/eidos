@@ -158,8 +158,18 @@ def export_extractions(extractions, fn):
 ###                             UTILS
 ### ------------------------------------------------------------
 
+def onlyascii(char):
+    if ord(char) < 48 or ord(char) > 127: return ''
+    else: return char
+
+def sanitize2(s):
+    s2 = ''.join([onlyascii(c) for c in s])
+    return s2
 
 def sanitize(s):
+    s = s.strip()
+    if s.endswith("."):
+        s = s[:-1]
     # for whitespace_character in string.whitespace:
     #     s.replace(whitespace_character, '')
     s = re.sub('"', '', s)
@@ -197,50 +207,50 @@ def get_files(path, ext):
     os.chdir(path)
     return glob.glob(f"*{ext}")
 
-def main():
+# def main():
+#
+#     # # load the master index info
+#     master_file = "/Users/bsharp/data/protests/0-BBC-News-Articles_Rebecca/0_NEW_ArticleLIST_Master_1-10679.csv"
+#     master_info = read_master_csv(master_file)
+#     master_aid_dict = convert_master_to_dict(master_info)
+#
+#     # final resting place...
+#     extractions = []
+#
+#     none_ctr = 0
+#     backoff_ctr = 0
+#     num_files = 0
+#
+#     for directory in ["1", "2", "3"]:
+#
+#         # load the index info
+#         # indices_dir = f"/Users/bsharp/data/protests/0-BBC-News-Articles_Rebecca/{directory}-BBC/indices"
+#         # filelist = get_files(indices_dir, "txt")
+#         # all_index_info = []
+#         # for f in filelist:
+#         #     all_index_info.extend(read_index(f))
+#         # all_index_info = convert_index_to_dict(all_index_info)
+#
+#
+#         # get the list of extraction files
+#         extraction_dir = f"/Users/bsharp/data/protests/0-BBC-News-Articles_Rebecca/{directory}-BBC/extractions"
+#         filelist = get_files(extraction_dir, "tsv")
+#         for f in filelist:
+#             num_files += 1
+#             file_extractions, none_ctr_file, backoff_ctr_file = read_extraction_file(f, master_info, master_info_backoff, all_index_info)
+#             extractions.extend(file_extractions)
+#             none_ctr += none_ctr_file
+#             backoff_ctr += backoff_ctr_file
 
-    # # load the master index info
-    master_file = "/Users/bsharp/data/protests/0-BBC-News-Articles_Rebecca/0_NEW_ArticleLIST_Master_1-10679.csv"
-    master_info = read_master_csv(master_file)
-    master_aid_dict = convert_master_to_dict(master_info)
 
-    # final resting place...
-    extractions = []
-
-    none_ctr = 0
-    backoff_ctr = 0
-    num_files = 0
-
-    for directory in ["1", "2", "3"]:
-
-        # load the index info
-        # indices_dir = f"/Users/bsharp/data/protests/0-BBC-News-Articles_Rebecca/{directory}-BBC/indices"
-        # filelist = get_files(indices_dir, "txt")
-        # all_index_info = []
-        # for f in filelist:
-        #     all_index_info.extend(read_index(f))
-        # all_index_info = convert_index_to_dict(all_index_info)
-
-
-        # get the list of extraction files
-        extraction_dir = f"/Users/bsharp/data/protests/0-BBC-News-Articles_Rebecca/{directory}-BBC/extractions"
-        filelist = get_files(extraction_dir, "tsv")
-        for f in filelist:
-            num_files += 1
-            file_extractions, none_ctr_file, backoff_ctr_file = read_extraction_file(f, master_info, master_info_backoff, all_index_info)
-            extractions.extend(file_extractions)
-            none_ctr += none_ctr_file
-            backoff_ctr += backoff_ctr_file
-
-
-    # export as one thing
-    print(f"There were a total of {none_ctr} files that were unusable bc of index issues.")
-    # print(f"There were a total of {backoff_ctr} files that were found with the backoff.")
-    print(f"There were a total of {backoff_ctr} files that were unused bc of empty titles.")
-    print(f"There were a total of {num_files} files.")
-    outputfile = "/Users/bsharp/data/protests/0-BBC-News-Articles_Rebecca/extractions_all_coverage.tsv"
-    # export_extractions(extractions, outputfile)
-    #
+    # # export as one thing
+    # print(f"There were a total of {none_ctr} files that were unusable bc of index issues.")
+    # # print(f"There were a total of {backoff_ctr} files that were found with the backoff.")
+    # print(f"There were a total of {backoff_ctr} files that were unused bc of empty titles.")
+    # print(f"There were a total of {num_files} files.")
+    # outputfile = "/Users/bsharp/data/protests/0-BBC-News-Articles_Rebecca/extractions_all_coverage.tsv"
+    # # export_extractions(extractions, outputfile)
+    # #
 
 
 

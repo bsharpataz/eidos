@@ -21,6 +21,7 @@
     - SimpleEvent:
       - Protest
       - Demand
+      - Response
     - DirectedRelation:
       - Causal
       - IsA

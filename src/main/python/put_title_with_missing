@@ -20,7 +20,7 @@ def lookup_aid_eid(fn, master_dict):
     woulda_worked = 0
     f = open(fn)
     lines = f.readlines()
-    invalid = ['', 'News']
+    invalid = ['', 'News', 'Publication title:', 'People:']
     kept = []
     for l in lines:
         if l.strip() not in invalid:
@@ -73,7 +73,14 @@ def main():
     print(f"From {files_seen} files, lookup woulda worked for {woulda}")
     print(len(aid_dict))
 
-    aid_out = open("/Users/bsharp/data/protests/aids.tsv", 'w')
+    aid_out = open("/Users/bsharp/data/protests/aids.tsv.3", 'w')
+    print(len(aid_dict))
+    print(len([v for (_, v) in aid_dict.items()]))
+    vals = set()
+    for _,v in aid_dict.items():
+        vals.add((v[0], v[1]))
+    print(len(vals))
+    # sys.exit()
     for k,v in aid_dict.items():
         aid_out.write(f"{k}\t{v[0]}\t{v[1]}\n")
     aid_out.close()

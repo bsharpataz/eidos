@@ -56,9 +56,7 @@ rules:
     priority: 1
     type: token
     pattern: |
-      [word = /(?i)^(${protest_triggers}|demonstrate|demonstration|${cause_triggers}|${reverse_direction_cause_triggers})/] # triggers used downstream
-      # This is if we want to no avoid the increase/decrease triggers at all...
-      #[word = /(?i)^(${cause_triggers}|${correlation_triggers})/] # triggers used downstream
+      [word = /(?i)^(${protest_triggers}|demonstrate|demonstration)/] # triggers used downstream
 
 
   - name: "gradable"

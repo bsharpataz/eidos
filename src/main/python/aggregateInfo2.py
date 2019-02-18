@@ -15,7 +15,7 @@ def read_aid_index(filename):
         for line in f:
             ext_filename, aid, eid = line.strip().split("\t")
             aid_index[ext_filename[:-4]] = aid_key(aid, eid)
-    print(aid_index)
+    # print(aid_index)
     # sys.exit()
     return aid_index
 
@@ -40,21 +40,24 @@ def read_master_csv(filename):
 def aid_key(aid, eid):
     return f"{aid}_{eid}"
 
-def read_extraction_file(fn, master_aid_dict, aid_index):
-    extractions = []
-    none_ctr = 0
-    empty_title_ctr = 0
-
-    file_prefix, file_index = get_file_prefix_and_index(fn)
-
+def master_lookup(aid_index, master_aid_dict, file_prefix, file_index, fn):
     file_key = f"{file_prefix}_{file_index}"
 
     if file_key in aid_index:
         k = aid_index[file_key]
         m = master_aid_dict[k]
     else:
-        print(f"not in aidindex: {file_key} (fn: {fn})")
+        # print(f"not in aidindex: {file_key} (fn: {fn})")
         m = None
+    return m
+
+def read_extraction_file(fn, master_aid_dict, aid_index):
+    extractions = []
+    none_ctr = 0
+    empty_title_ctr = 0
+
+    file_prefix, file_index = get_file_prefix_and_index(fn)
+    m = master_lookup(aid_index, master_aid_dict, file_prefix, file_index, fn)
 
     if m:
 
@@ -115,7 +118,7 @@ def get_files(path, ext):
     os.chdir(path)
     return glob.glob(f"*{ext}")
 
-def main():
+def aggregate():
 
     # # load the master index info
     master_file = "/Users/bsharp/data/protests/0-BBC-News-Articles_Rebecca/0_NEW_ArticleLIST_Master_1-10679.csv"
@@ -156,5 +159,5 @@ def main():
     #
 
 
-
-main()
+if __name__ == '__main__':
+    aggregate()

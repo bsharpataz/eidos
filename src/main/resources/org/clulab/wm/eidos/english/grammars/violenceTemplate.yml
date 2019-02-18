@@ -1,4 +1,8 @@
 
+# first find the actors (protestors vs govt)
+# then use that to identify who is doing the violence
+# make use of the authorities.yml already found
+
 rules:
     - name: ${label}-1
       label: ${label}

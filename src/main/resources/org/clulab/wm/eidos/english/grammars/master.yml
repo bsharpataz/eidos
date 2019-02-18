@@ -103,29 +103,8 @@ rules:
       rulepriority: "3"
       action: applyAttachment #Should add Increase/Decrease to state of entity
 
-#  - import: org/clulab/wm/eidos/grammars/modifiersTemplate.yml
-#    vars:
-#      rulepriority: "3"
-#      action: pass #Should add Increase/Decrease to state of entity
-#      label: ProtestAgainst
-#      trigger: ${ protest_triggers }
-
-
   # ------------ Protest ------------
 
-#  - import: org/clulab/wm/eidos/grammars/linkersTemplate.yml
-#    vars:
-#      rulepriority: "4"
-#      addlabel: "Protest"
-#      label: Protest
-#      action: pass
-#      trigger: ${protest_triggers}
-
-
-  #Step 3: Find entity-linking events (e.g. "rainfall causes flooding")
-  #Acts upon entities
-
-  # ------------ PROTEST ------------
   - import: org/clulab/wm/eidos/english/grammars/protest.yml
     vars:
       rulepriority: "6"
@@ -135,7 +114,7 @@ rules:
       trigger: ${protest_triggers}
 
 
-  # ------------ PROTEST ------------
+  # ------------ DEMAND ------------
   - import: org/clulab/wm/eidos/english/grammars/demand.yml
     vars:
       rulepriority: "6"
@@ -144,44 +123,9 @@ rules:
       action: filterAuthorities
       trigger: ${demand_triggers}
 
-  # ------------ Causal ------------
-#  - import: org/clulab/wm/eidos/grammars/linkersTemplate.yml
-#    vars:
-#      rulepriority: "6"
-#      addlabel: "Causal"
-#      label: Causal
-#      action: pass
-#      trigger: ${cause_triggers}|${increase_triggers}|${decrease_triggers} #|${affect_triggers}|${nonavoid_affect_triggers}
-#
-#  - import: org/clulab/wm/eidos/grammars/reverse_direction_causal.yml
-#    vars:
-#      rulepriority: "6"
-#      addlabel: "Causal"
-#      label: Causal
-#      action: pass
-#      trigger: ${reverse_direction_cause_triggers}
-
-
-
-#  # ------------ ExplicitLinker ------------
-#  - import: org/clulab/wm/eidos/grammars/explicitLinkers.yml
-#    vars:
-#      rulepriority: "6"
-#      trigger: ${increase_triggers}|${decrease_triggers}
-#      correlation_trigger: ${correlation_triggers}
-#      action: pass
-#      #action: ? #
-
-  # ------------ Correlation ------------
-#  - import: org/clulab/wm/eidos/grammars/linkersTemplate.yml
-#    vars:
-#      rulepriority: "6"
-#      addlabel: "Correlation"
-#      label: Correlation
-#      action: pass
-#      trigger: ${correlation_triggers}
-
-  # todo: result of, outcome of as triggers -- reverse direction rules
-  # relate to as correlation trigger
-  # maybe add temporal rules???
-  # import
+  # ------------ DEMAND ------------
+  - import: org/clulab/wm/eidos/english/grammars/governmentResponse.yml
+    vars:
+      rulepriority: "7"
+      action: filterAfterProtest
+      label: Response

@@ -378,18 +378,28 @@ class EidosActions(val taxonomy: Taxonomy, val expansionHandler: ExpansionHandle
   }
 
   def filterAuthorities(ms: Seq[Mention], state: State): Seq[Mention] = {
+    val authorityState = State(state.allMentions.filter(_ matches "Authorities")) // fixme put string somewhere
     for {
-      (_, mentions) <- ms.groupBy(m => (m.sentence, m.tokenInterval, m.label)).toSeq
+      (_, mentionsInGroup) <- ms.groupBy(m => (m.sentence, m.tokenInterval, m.label)).toSeq
 
-      _ = println(s"Checking ${mentions.head.text}")
-      as = mentions.flatMap(m => m.arguments.getOrElse("actor", Seq.empty[Mention]))
-      _ = println(as.map(_.text).mkString(", "))
-      _ = println("-->" + as.map(_.label).mkString(", "))
-      cond = as.exists(actor => actor matches("Authorities"))
-      if !cond
-    } yield mentions.head
+      actors = mentionsInGroup.flatMap(m => m.arguments.getOrElse("actor", Seq.empty[Mention]))
+      sameAsAnAuthorityMention = actors.exists(actor => actor matches("Authorities"))
+      hasAnAuthorityHead = actors.exists(actor => authorityState.mentionsFor(actor.sentence, actor.synHead.getOrElse(-1)).nonEmpty)
+      if !sameAsAnAuthorityMention && !hasAnAuthorityHead
+    } yield mentionsInGroup.head
   }
 
+  def filterAfterProtest(ms: Seq[Mention], state: State): Seq[Mention] = {
+    // remove negated
+    val notNegated = ms//removeNegated(ms, state)
+    //println(s"There are ${notNegated.length} not negated mentions")
+    // make sure follow a protest
+    for {
+      m <- notNegated
+      prevSentencesMentions = state.allMentions.filter(_.sentence < m.sentence)
+      if prevSentencesMentions.exists(pm => EidosSystem.PROTEST_DEMAND.contains(pm.label))
+    } yield m
+  }
 
 
   /*
@@ -426,7 +436,6 @@ class EidosActions(val taxonomy: Taxonomy, val expansionHandler: ExpansionHandle
     for {
       m <- mentions
       outgoing = m.sentenceObj.dependencies.get.outgoingEdges
-      sdlks = outgoing.lift(0)
       if !m.tokenInterval.exists(tok => outgoing.lift(tok).getOrElse(Array((0,""))).exists(dep => dep._2 == "neg"))
     } yield m
   }

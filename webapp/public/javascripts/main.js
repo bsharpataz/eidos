@@ -10,6 +10,7 @@ var causalEventColor = '#BB8FCE';
 var correlationEventColor = '#F7DC6F';
 var protestEventColor = '#77bfff';
 var demandEventColor = '#fc993c';
+var responseColor = '#FEAFC0';
 var locColor = '#8bd884';
 var timeExpressionColor = '#FFA500'
 var geoLocationColor = '#FFA500'
@@ -182,6 +183,16 @@ var collData = {
              {"type": "actor", "labels": ["actor"], "borderColor": "darken", "bgColor":"pink"}
             ]
         },
+      {
+        "type": "Response",
+        "labels": ["RESPONSE"],
+        "bgColor": responseColor,
+        "borderColor": "darken",
+       "arcs": [
+           {"type": "theme", "labels": ["theme"], "borderColor": "darken", "bgColor":"pink"},
+           {"type": "actor", "labels": ["actor"], "borderColor": "darken", "bgColor":"pink"}
+          ]
+      },
 
     ]
 };
